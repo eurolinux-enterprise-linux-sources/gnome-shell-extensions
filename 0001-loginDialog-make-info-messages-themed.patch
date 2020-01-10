@@ -1,0 +1,32 @@
+From 6bb945c95efae345ca388df4a2251a14a55630a5 Mon Sep 17 00:00:00 2001
+From: Ray Strode <rstrode@redhat.com>
+Date: Mon, 26 Jun 2017 14:35:05 -0400
+Subject: [PATCH] loginDialog: make info messages themed
+
+They were lacking a definition before leading them to
+show up invisible.
+---
+ data/gnome-classic.css | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/data/gnome-classic.css b/data/gnome-classic.css
+index d9291a1..4d0d737 100644
+--- a/data/gnome-classic.css
++++ b/data/gnome-classic.css
+@@ -1651,9 +1651,11 @@ StScrollBar {
+ .login-dialog-message-warning {
+   color: #f57900; }
+ 
+-.login-dialog-message-hint {
++.login-dialog-message-hint, .login-dialog-message {
++  color: #bebeb6;
+   padding-top: 0;
+-  padding-bottom: 20px; }
++  padding-bottom: 20px;
++  min-height: 2.75em; }
+ 
+ .login-dialog-user-selection-box {
+   padding: 100px 0px; }
+-- 
+2.14.2
+

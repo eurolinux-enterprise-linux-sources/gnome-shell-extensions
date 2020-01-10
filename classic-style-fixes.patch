@@ -1,0 +1,89 @@
+From 145845f99ac42d0355752d60bbcf561ce31afb55 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Florian=20M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Wed, 17 Jan 2018 18:26:51 +0100
+Subject: [PATCH 1/3] classic: Fix "Clear All" button readability
+
+Most buttons appear in modal dialogs which keep their normal
+appearance in the classic theme, except for the calendar's
+"Clear All" which needs a dark text color to be readable on
+the light background.
+
+https://gitlab.gnome.org/GNOME/gnome-shell-extensions/issues/26
+---
+ data/gnome-classic.css  | 3 +++
+ 2 files changed, 7 insertions(+)
+
+diff --git a/data/gnome-classic.css b/data/gnome-classic.css
+index 4d0d737..be332c9 100644
+--- a/data/gnome-classic.css
++++ b/data/gnome-classic.css
+@@ -1961,3 +1961,6 @@ StScrollBar {
+ 
+ .calendar-day-with-events {
+   background-image: url("calendar-today.svg"); }
++
++.message-list-clear-button.button {
++  color: #2e3436; }
+-- 
+2.14.3
+
+
+From c882621cb806474c077f1511a0f0cfd87432d4c7 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jonas=20K=C3=BCmmerlin?= <rgcjonas@gmail.com>
+Date: Wed, 24 Jan 2018 22:07:36 +0100
+Subject: [PATCH 2/3] classic: make notifications legible again
+
+https://gitlab.gnome.org/GNOME/gnome-shell-extensions/issues/41
+
+As requested in discussion about !26, this is resolved by
+switching to a light background.
+---
+ data/gnome-classic.css  | 8 ++++++++
+ 2 files changed, 17 insertions(+)
+
+diff --git a/data/gnome-classic.css b/data/gnome-classic.css
+index be332c9..6dad881 100644
+--- a/data/gnome-classic.css
++++ b/data/gnome-classic.css
+@@ -1964,3 +1964,11 @@ StScrollBar {
+ 
+ .message-list-clear-button.button {
+   color: #2e3436; }
++
++.notification-banner {
++  background-color: #ededed !important;
++  color: #2e3436; }
++  .notification-banner .notification-button {
++    background-color: #e0e0e0; }
++    .notification-banner .notification-button:hover, .notification-banner .notification-buttonfocus {
++      background-color: #e8e8e8; }
+-- 
+2.14.3
+
+
+From eac93f3f081306d62d82e8d2e45f73cd38c318b1 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jonas=20K=C3=BCmmerlin?= <rgcjonas@gmail.com>
+Date: Wed, 24 Jan 2018 22:24:06 +0100
+Subject: [PATCH 3/3] classic: never show drop shadow for panel icons
+
+https://gitlab.gnome.org/GNOME/gnome-shell-extensions/issues/39
+---
+ data/gnome-classic.css  | 2 ++
+ 2 files changed, 6 insertions(+)
+
+diff --git a/data/gnome-classic.css b/data/gnome-classic.css
+index 6dad881..93d84ba 100644
+--- a/data/gnome-classic.css
++++ b/data/gnome-classic.css
+@@ -1923,6 +1923,8 @@ StScrollBar {
+       width: 0;
+       height: 0;
+       margin: 0; }
++    #panel .panel-button .system-status-icon {
++      icon-shadow: none; }
+   #panel .panel-corner,
+   #panel .panel-corner:active,
+   #panel .panel-corner:overview,
+-- 
+2.14.3
+

@@ -1,4 +1,4 @@
-From c6d579383b1e3f092cc289291d8f701011d37a67 Mon Sep 17 00:00:00 2001
+From d04e66f692f5022a476c4ad8a9caeb0b5952b7b0 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Florian=20M=C3=BCllner?= <fmuellner@gnome.org>
 Date: Thu, 17 Mar 2016 17:15:38 +0100
 Subject: [PATCH] apps-menu: Explicitly set label_actor
@@ -10,102 +10,21 @@ so set the label_actor explicitly as workaround.
  1 file changed, 6 insertions(+), 2 deletions(-)
 
 diff --git a/extensions/apps-menu/extension.js b/extensions/apps-menu/extension.js
-index 5067b63..49a05c7 100644
+index 41d1faf..03000bf 100644
 --- a/extensions/apps-menu/extension.js
 +++ b/extensions/apps-menu/extension.js
-@@ -7,61 +7,63 @@ const Shell = imports.gi.Shell;
- const St = imports.gi.St;
- const Clutter = imports.gi.Clutter;
- const Main = imports.ui.main;
- const Meta = imports.gi.Meta;
- const PanelMenu = imports.ui.panelMenu;
- const PopupMenu = imports.ui.popupMenu;
- const Gtk = imports.gi.Gtk;
- const GLib = imports.gi.GLib;
- const Gio = imports.gi.Gio;
- const Signals = imports.signals;
- const Pango = imports.gi.Pango;
- 
- const Gettext = imports.gettext.domain('gnome-shell-extensions');
- const _ = Gettext.gettext;
- 
- const ExtensionUtils = imports.misc.extensionUtils;
- const Me = ExtensionUtils.getCurrentExtension();
- const Convenience = Me.imports.convenience;
- 
- const appSys = Shell.AppSystem.get_default();
- 
- const APPLICATION_ICON_SIZE = 32;
- const HORIZ_FACTOR = 5;
- const MENU_HEIGHT_OFFSET = 132;
- const NAVIGATION_REGION_OVERSHOOT = 50;
- 
- class ActivitiesMenuItem extends PopupMenu.PopupBaseMenuItem {
-     constructor(button) {
-         super();
+@@ -38,7 +38,9 @@ const ActivitiesMenuItem = new Lang.Class({
+     _init: function(button) {
+ 	this.parent();
          this._button = button;
 -        this.actor.add_child(new St.Label({ text: _("Activities Overview") }));
 +        let label = new St.Label({ text: _("Activities Overview") });
 +        this.actor.add_child(label);
 +        this.actor.label_actor = label;
-     }
+     },
  
-     activate(event) {
-         this._button.menu.toggle();
-         Main.overview.toggle();
-         super.activate(event);
-     }
- };
- 
- class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
-     constructor(button, app) {
-         super();
-         this._app = app;
-         this._button = button;
- 
-         this._iconBin = new St.Bin();
-         this.actor.add_child(this._iconBin);
- 
-         let appLabel = new St.Label({ text: app.get_name(), y_expand: true,
-                                       y_align: Clutter.ActorAlign.CENTER });
-         this.actor.add_child(appLabel);
-         this.actor.label_actor = appLabel;
- 
-         let textureCache = St.TextureCache.get_default();
-         let iconThemeChangedId = textureCache.connect('icon-theme-changed',
-                                                       this._updateIcon.bind(this));
-         this.actor.connect('destroy', () => {
-             textureCache.disconnect(iconThemeChangedId);
-         });
-         this._updateIcon();
-@@ -102,61 +104,63 @@ class ApplicationMenuItem extends PopupMenu.PopupBaseMenuItem {
-     }
- 
-     getDragActor() {
-         return this._app.create_icon_texture(APPLICATION_ICON_SIZE);
-     }
- 
-     getDragActorSource() {
-         return this._iconBin;
-     }
- 
-     _updateIcon() {
-         this._iconBin.set_child(this.getDragActor());
-     }
- };
- 
- class CategoryMenuItem extends PopupMenu.PopupBaseMenuItem {
-     constructor(button, category) {
-         super();
-         this._category = category;
-         this._button = button;
- 
-         this._oldX = -1;
-         this._oldY = -1;
- 
-         let name;
-         if (this._category)
-             name = this._category.get_name();
+     activate: function(event) {
+@@ -140,7 +142,9 @@ const CategoryMenuItem = new Lang.Class({
          else
              name = _("Favorites");
  
@@ -113,36 +32,9 @@ index 5067b63..49a05c7 100644
 +        let label = new St.Label({ text: name });
 +        this.actor.add_child(label);
 +        this.actor.label_actor = label;
-         this.actor.connect('motion-event', this._onMotionEvent.bind(this));
-     }
+         this.actor.connect('motion-event', Lang.bind(this, this._onMotionEvent));
+     },
  
-     activate(event) {
-         this._button.selectCategory(this._category, this);
-         this._button.scrollToCatButton(this);
-         super.activate(event);
-     }
- 
-     _isNavigatingSubmenu([x, y]) {
-         let [posX, posY] = this.actor.get_transformed_position();
- 
-         if (this._oldX == -1) {
-             this._oldX = x;
-             this._oldY = y;
-             return true;
-         }
- 
-         let deltaX = Math.abs(x - this._oldX);
-         let deltaY = Math.abs(y - this._oldY);
- 
-         this._oldX = x;
-         this._oldY = y;
- 
-         // If it lies outside the x-coordinates then it is definitely outside.
-         if (posX > x || posX + this.actor.width < x)
-             return false;
- 
-         // If it lies inside the menu item then it is definitely inside.
-         if (posY <= y && posY + this.actor.height >= y)
 -- 
-2.17.1
+2.14.2
 

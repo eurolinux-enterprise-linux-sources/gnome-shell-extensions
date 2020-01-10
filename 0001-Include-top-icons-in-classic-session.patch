@@ -1,99 +1,28 @@
-From bf91d6c08f471ab729507d1ebd4c46b336ca2cef Mon Sep 17 00:00:00 2001
+From d5e0f26fc59216da2b2f129d4395a9da0c63e974 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Florian=20M=C3=BCllner?= <fmuellner@gnome.org>
 Date: Fri, 23 Feb 2018 16:56:46 +0100
 Subject: [PATCH] Include top-icons in classic session
 
 ---
- meson.build | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ configure.ac | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/meson.build b/meson.build
-index cde2d34..7a4c0d6 100644
---- a/meson.build
-+++ b/meson.build
-@@ -11,81 +11,81 @@ i18n = import('i18n')
+diff --git a/configure.ac b/configure.ac
+index ddb6422..378783f 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -29,9 +29,9 @@ fi
+ AC_SUBST([SHELL_VERSION])
  
- datadir = get_option('datadir')
- 
- shelldir = join_paths(datadir, 'gnome-shell')
- extensiondir = join_paths(shelldir, 'extensions')
- modedir = join_paths(shelldir, 'modes')
- themedir = join_paths(shelldir, 'theme')
- 
- schemadir = join_paths(datadir, 'glib-2.0', 'schemas')
- sessiondir = join_paths(datadir, 'gnome-session', 'sessions')
- xsessiondir = join_paths(datadir, 'xsessions')
- 
- extensionlib = files('lib/convenience.js')
- 
- js52 = find_program('js52', required: false)
- 
- ver_arr = meson.project_version().split('.')
- if ver_arr[1].to_int().is_even()
-   shell_version = '@0@.@1@'.format(ver_arr[0], ver_arr[1])
- else
-   shell_version = '.'.join(ver_arr)
- endif
- 
- uuid_suffix = '@gnome-shell-extensions.gcampax.github.com'
- 
- classic_extensions = [
-   'alternate-tab',
-   'apps-menu',
-   'places-menu',
-   'launch-new-instance',
-+  'top-icons',
-   'window-list'
- ]
- 
- default_extensions = classic_extensions
- default_extensions += [
-   'drive-menu',
-   'screenshot-window-sizer',
-   'windowsNavigator',
-   'workspace-indicator'
- ]
- 
- all_extensions = default_extensions
- all_extensions += [
-   'auto-move-windows',
-   'dash-to-dock',
-   'example',
-   'native-window-placement',
-   'no-hot-corner',
-   'panel-favorites',
-   'systemMonitor',
--  'top-icons',
-   'updates-dialog',
-   'user-theme'
- ]
- 
- enabled_extensions = get_option('enable_extensions')
- 
- if enabled_extensions.length() == 0
-   set = get_option('extension_set')
- 
-   if set == 'classic'
-     enabled_extensions += classic_extensions
-   elif set == 'default'
-     enabled_extensions += default_extensions
-   elif set == 'all'
-     enabled_extensions += all_extensions
-   endif
- endif
- 
- classic_mode_enabled = get_option('classic_mode')
- 
- if classic_mode_enabled
-   # Sanity check: Make sure all classic extensions are enabled
-   foreach e : classic_extensions
-     if not enabled_extensions.contains(e)
-       error('Classic mode is enabled, ' +
-             'but the required extension @0@ is not.'.format(e))
-     endif
-   endforeach
- endif
- 
+ dnl keep this in alphabetic order
+-CLASSIC_EXTENSIONS="apps-menu places-menu alternate-tab launch-new-instance window-list"
++CLASSIC_EXTENSIONS="apps-menu places-menu alternate-tab launch-new-instance top-icons window-list"
+ DEFAULT_EXTENSIONS="$CLASSIC_EXTENSIONS drive-menu screenshot-window-sizer windowsNavigator workspace-indicator"
+-ALL_EXTENSIONS="$DEFAULT_EXTENSIONS auto-move-windows dash-to-dock example native-window-placement no-hot-corner panel-favorites systemMonitor top-icons updates-dialog user-theme"
++ALL_EXTENSIONS="$DEFAULT_EXTENSIONS auto-move-windows dash-to-dock example native-window-placement no-hot-corner panel-favorites systemMonitor updates-dialog user-theme"
+ AC_SUBST(CLASSIC_EXTENSIONS, [$CLASSIC_EXTENSIONS])
+ AC_SUBST(ALL_EXTENSIONS, [$ALL_EXTENSIONS])
+ AC_ARG_ENABLE([extensions],
 -- 
-2.17.1
+2.14.3
 
