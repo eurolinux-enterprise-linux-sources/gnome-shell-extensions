@@ -1,0 +1,29 @@
+From fe6695b8d45fe7d1d9aea8c41c9aa54048a9704d Mon Sep 17 00:00:00 2001
+From: Ray Strode <rstrode@redhat.com>
+Date: Tue, 21 Jan 2014 16:48:17 -0500
+Subject: [PATCH] apps-menu: add logo icon to Applications menu
+
+Brand requested it.
+---
+ extensions/apps-menu/extension.js | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/extensions/apps-menu/extension.js b/extensions/apps-menu/extension.js
+index 2f4002a..41d1faf 100644
+--- a/extensions/apps-menu/extension.js
++++ b/extensions/apps-menu/extension.js
+@@ -433,6 +433,11 @@ const ApplicationsButton = new Lang.Class({
+ 
+         let hbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
+ 
++        let iconFile = Gio.File.new_for_path('/usr/share/icons/hicolor/scalable/apps/start-here.svg');
++        this._icon = new St.Icon({ gicon: new Gio.FileIcon({ file: iconFile }),
++                                   style_class: 'panel-logo-icon' });
++        hbox.add_actor(this._icon);
++
+         this._label = new St.Label({ text: _("Applications"),
+                                      y_expand: true,
+                                      y_align: Clutter.ActorAlign.CENTER });
+-- 
+2.14.2
+
