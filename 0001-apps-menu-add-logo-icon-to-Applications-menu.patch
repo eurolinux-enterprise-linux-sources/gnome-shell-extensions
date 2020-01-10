@@ -1,18 +1,41 @@
-From fe6695b8d45fe7d1d9aea8c41c9aa54048a9704d Mon Sep 17 00:00:00 2001
+From f1a607062817a981099349139055618542ea1f05 Mon Sep 17 00:00:00 2001
 From: Ray Strode <rstrode@redhat.com>
 Date: Tue, 21 Jan 2014 16:48:17 -0500
 Subject: [PATCH] apps-menu: add logo icon to Applications menu
 
 Brand requested it.
 ---
- extensions/apps-menu/extension.js | 5 +++++
- 1 file changed, 5 insertions(+)
+ data/gnome-classic.css            | 3 +++
+ extensions/apps-menu/extension.js | 6 ++++++
+ 2 files changed, 9 insertions(+)
 
+diff --git a/data/gnome-classic.css b/data/gnome-classic.css
+index 29a4132..f1a004d 100644
+--- a/data/gnome-classic.css
++++ b/data/gnome-classic.css
+@@ -686,6 +686,9 @@ StScrollBar {
+       -st-icon-style: symbolic;
+       margin-left: 4px;
+       margin-right: 4px; }
++    #panel .panel-button .panel-logo-icon {
++      padding-right: .4em;
++      icon-size: 1em; }
+     #panel .panel-button:hover {
+       color: #454f52; }
+     #panel .panel-button:active, #panel .panel-button:overview, #panel .panel-button:focus, #panel .panel-button:checked {
 diff --git a/extensions/apps-menu/extension.js b/extensions/apps-menu/extension.js
-index 2f4002a..41d1faf 100644
+index 4792854..8e7afef 100644
 --- a/extensions/apps-menu/extension.js
 +++ b/extensions/apps-menu/extension.js
-@@ -433,6 +433,11 @@ const ApplicationsButton = new Lang.Class({
+@@ -1,6 +1,7 @@
+ /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
+ 
+ const Atk = imports.gi.Atk;
++const Gio = imports.gi.Gio;
+ const GMenu = imports.gi.GMenu;
+ const Lang = imports.lang;
+ const Shell = imports.gi.Shell;
+@@ -263,6 +264,11 @@ const ApplicationsButton = new Lang.Class({
  
          let hbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
  
@@ -25,5 +48,5 @@ index 2f4002a..41d1faf 100644
                                       y_expand: true,
                                       y_align: Clutter.ActorAlign.CENTER });
 -- 
-2.14.2
+2.12.0
 

@@ -1,53 +1,51 @@
 # Hungarian translation of
-# Copyright (C) 2011, 2012, 2013, 2014, 2017 Free Software Foundation, Inc.
+# Copyright (C) 2011, 2012, 2013. Free Software Foundation, Inc.
 # This file is distributed under the same license as the gnome-shell-extensions package.
 #
 # Biró Balázs <arch.scar at gmail dot com>, 2011.
 # Gabor Kelemen <kelemeng at gnome dot hu>, 2011, 2012, 2013.
-# Balázs Úr <urbalazs at gmail dot com>, 2013, 2014, 2017.
+# Balázs Úr <urbalazs at gmail dot com>, 2013, 2014.
 msgid ""
 msgstr ""
 "Project-Id-Version: gnome-shell-extensions master\n"
-"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?product=gnome-"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=gnome-"
 "shell&keywords=I18N+L10N&component=extensions\n"
-"POT-Creation-Date: 2017-07-31 22:32+0000\n"
-"PO-Revision-Date: 2017-08-03 09:14+0200\n"
-"Last-Translator: Meskó Balázs <meskobalazs@fedoraproject.org>\n"
+"POT-Creation-Date: 2014-12-20 08:36+0000\n"
+"PO-Revision-Date: 2014-12-20 13:34+0100\n"
+"Last-Translator: Balázs Úr <urbalazs@gmail.com>\n"
 "Language-Team: Hungarian <openscope at googlegroups dot com>\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.0.2\n"
+"X-Generator: Lokalize 1.2\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: data/gnome-classic.desktop.in:3 data/gnome-classic.session.desktop.in:3
+#: ../data/gnome-classic.desktop.in.h:1
+#: ../data/gnome-classic.session.desktop.in.in.h:1
 msgid "GNOME Classic"
 msgstr "Klasszikus GNOME"
 
-#: data/gnome-classic.desktop.in:4
+#: ../data/gnome-classic.desktop.in.h:2
 msgid "This session logs you into GNOME Classic"
 msgstr "Bejelentkezés a klasszikus GNOME környezetbe"
 
-#: data/org.gnome.shell.extensions.classic-overrides.gschema.xml:7
+#: ../data/org.gnome.shell.extensions.classic-overrides.gschema.xml.in.h:1
 msgid "Attach modal dialog to the parent window"
 msgstr "Kizárólagos ablak csatlakoztatása a szülő ablakhoz"
 
-#: data/org.gnome.shell.extensions.classic-overrides.gschema.xml:8
-#: data/org.gnome.shell.extensions.classic-overrides.gschema.xml:25
-#: data/org.gnome.shell.extensions.classic-overrides.gschema.xml:33
-#: data/org.gnome.shell.extensions.classic-overrides.gschema.xml:41
+#: ../data/org.gnome.shell.extensions.classic-overrides.gschema.xml.in.h:2
 msgid ""
 "This key overrides the key in org.gnome.mutter when running GNOME Shell."
 msgstr ""
 "Ez a beállítás felülírja az org.gnome.mutter séma beállításokat, amikor a "
 "GNOME Shell fut."
 
-#: data/org.gnome.shell.extensions.classic-overrides.gschema.xml:16
+#: ../data/org.gnome.shell.extensions.classic-overrides.gschema.xml.in.h:3
 msgid "Arrangement of buttons on the titlebar"
 msgstr "A gombok elrendezése az ablak címsorában"
 
-#: data/org.gnome.shell.extensions.classic-overrides.gschema.xml:17
+#: ../data/org.gnome.shell.extensions.classic-overrides.gschema.xml.in.h:4
 msgid ""
 "This key overrides the key in org.gnome.desktop.wm.preferences when running "
 "GNOME Shell."
@@ -55,56 +53,56 @@ msgstr ""
 "Ez a beállítás felülírja az org.gnome.desktop.wm.preferences séma "
 "beállításokat, amikor a GNOME Shell fut."
 
-#: data/org.gnome.shell.extensions.classic-overrides.gschema.xml:24
+#: ../data/org.gnome.shell.extensions.classic-overrides.gschema.xml.in.h:5
 msgid "Enable edge tiling when dropping windows on screen edges"
 msgstr "Szélek csempézésének engedélyezése ablakok képernyőszélekre ejtésekor"
 
-#: data/org.gnome.shell.extensions.classic-overrides.gschema.xml:32
+#: ../data/org.gnome.shell.extensions.classic-overrides.gschema.xml.in.h:6
 msgid "Workspaces only on primary monitor"
 msgstr "Munkaterületek megjelenítése csak az elsődleges monitoron"
 
-#: data/org.gnome.shell.extensions.classic-overrides.gschema.xml:40
+#: ../data/org.gnome.shell.extensions.classic-overrides.gschema.xml.in.h:7
 msgid "Delay focus changes in mouse mode until the pointer stops moving"
 msgstr ""
 "Fókuszváltozások késleltetése a mutató mozgásának megállásáig egér módban"
 
-#: extensions/alternate-tab/prefs.js:20
+#: ../extensions/alternate-tab/prefs.js:20
 msgid "Thumbnail only"
 msgstr "Csak bélyegkép"
 
-#: extensions/alternate-tab/prefs.js:21
+#: ../extensions/alternate-tab/prefs.js:21
 msgid "Application icon only"
 msgstr "Csak alkalmazásikon"
 
-#: extensions/alternate-tab/prefs.js:22
+#: ../extensions/alternate-tab/prefs.js:22
 msgid "Thumbnail and application icon"
 msgstr "Bélyegkép és alkalmazásikon"
 
-#: extensions/alternate-tab/prefs.js:38
+#: ../extensions/alternate-tab/prefs.js:38
 msgid "Present windows as"
 msgstr "Ablakok megjelenítése mint"
 
-#: extensions/alternate-tab/prefs.js:69
+#: ../extensions/alternate-tab/prefs.js:69
 msgid "Show only windows in the current workspace"
 msgstr "Csak az aktuális munkaterület ablakainak megjelenítése"
 
-#: extensions/apps-menu/extension.js:41
+#: ../extensions/apps-menu/extension.js:39
 msgid "Activities Overview"
 msgstr "Tevékenységek áttekintés"
 
-#: extensions/apps-menu/extension.js:141
+#: ../extensions/apps-menu/extension.js:114
 msgid "Favorites"
 msgstr "Kedvencek"
 
-#: extensions/apps-menu/extension.js:436
+#: ../extensions/apps-menu/extension.js:283
 msgid "Applications"
 msgstr "Alkalmazások"
 
-#: extensions/auto-move-windows/org.gnome.shell.extensions.auto-move-windows.gschema.xml:6
+#: ../extensions/auto-move-windows/org.gnome.shell.extensions.auto-move-windows.gschema.xml.in.h:1
 msgid "Application and workspace list"
 msgstr "Alkalmazások és munkaterületek listája"
 
-#: extensions/auto-move-windows/org.gnome.shell.extensions.auto-move-windows.gschema.xml:7
+#: ../extensions/auto-move-windows/org.gnome.shell.extensions.auto-move-windows.gschema.xml.in.h:2
 msgid ""
 "A list of strings, each containing an application id (desktop file name), "
 "followed by a colon and the workspace number"
@@ -112,76 +110,74 @@ msgstr ""
 "Alkalmazásazonosítókat (.desktop fájl neve), majd kettősponttal elválasztva "
 "a munkaterület számát tartalmazó karakterláncok sorozata"
 
-#: extensions/auto-move-windows/prefs.js:60
+#: ../extensions/auto-move-windows/prefs.js:60
 msgid "Application"
 msgstr "Alkalmazás"
 
-#: extensions/auto-move-windows/prefs.js:69
-#: extensions/auto-move-windows/prefs.js:127
+#: ../extensions/auto-move-windows/prefs.js:69
+#: ../extensions/auto-move-windows/prefs.js:127
 msgid "Workspace"
 msgstr "Munkaterület"
 
-#: extensions/auto-move-windows/prefs.js:85
+#: ../extensions/auto-move-windows/prefs.js:85
 msgid "Add Rule"
 msgstr "Szabály hozzáadása"
 
-#: extensions/auto-move-windows/prefs.js:106
+#: ../extensions/auto-move-windows/prefs.js:106
 msgid "Create new matching rule"
 msgstr "Új illesztési szabály létrehozása"
 
-#: extensions/auto-move-windows/prefs.js:111
+#: ../extensions/auto-move-windows/prefs.js:111
 msgid "Add"
 msgstr "Hozzáadás"
 
-#: extensions/drive-menu/extension.js:106
+#: ../extensions/drive-menu/extension.js:106
 #, javascript-format
-msgid "Ejecting drive “%s” failed:"
+msgid "Ejecting drive '%s' failed:"
 msgstr "A(z) „%s” meghajtó kiadása nem sikerült:"
 
-#: extensions/drive-menu/extension.js:124
+#: ../extensions/drive-menu/extension.js:124
 msgid "Removable devices"
 msgstr "Cserélhető eszközök"
 
-#: extensions/drive-menu/extension.js:149
-msgid "Open Files"
-msgstr "Fájlok megnyitása"
+#: ../extensions/drive-menu/extension.js:151
+msgid "Open File"
+msgstr "Fájl megnyitása"
 
-#: extensions/example/extension.js:17
+#: ../extensions/example/extension.js:17
 msgid "Hello, world!"
 msgstr "Helló, világ!"
 
-#: extensions/example/org.gnome.shell.extensions.example.gschema.xml:5
+#: ../extensions/example/org.gnome.shell.extensions.example.gschema.xml.in.h:1
 msgid "Alternative greeting text."
 msgstr "Alternatív üdvözlőszöveg."
 
-#: extensions/example/org.gnome.shell.extensions.example.gschema.xml:6
+#: ../extensions/example/org.gnome.shell.extensions.example.gschema.xml.in.h:2
 msgid ""
 "If not empty, it contains the text that will be shown when clicking on the "
 "panel."
 msgstr ""
 "Ha nem üres, akkor a panelre kattintáskor megjelenő szöveget tartalmazza."
 
-#: extensions/example/prefs.js:30
+#: ../extensions/example/prefs.js:30
 msgid "Message"
 msgstr "Üzenet"
 
-#. TRANSLATORS: Example is the name of the extension, should not be
-#. translated
-#: extensions/example/prefs.js:43
+#: ../extensions/example/prefs.js:43
 msgid ""
 "Example aims to show how to build well behaved extensions for the Shell and "
 "as such it has little functionality on its own.\n"
-"Nevertheless it’s possible to customize the greeting message."
+"Nevertheless it's possible to customize the greeting message."
 msgstr ""
 "Az Example célja a jól működő Shell kiterjesztések készítésének bemutatása, "
 "és mint ilyen, önmagában nem sok mindenre használható.\n"
 "Ugyanakkor az üdvözlőszöveg megváltoztatható."
 
-#: extensions/native-window-placement/org.gnome.shell.extensions.native-window-placement.gschema.xml:5
+#: ../extensions/native-window-placement/org.gnome.shell.extensions.native-window-placement.gschema.xml.in.h:1
 msgid "Use more screen for windows"
 msgstr "Nagyobb képernyőterület használata ablakokhoz"
 
-#: extensions/native-window-placement/org.gnome.shell.extensions.native-window-placement.gschema.xml:6
+#: ../extensions/native-window-placement/org.gnome.shell.extensions.native-window-placement.gschema.xml.in.h:2
 msgid ""
 "Try to use more screen for placing window thumbnails by adapting to screen "
 "aspect ratio, and consolidating them further to reduce the bounding box. "
@@ -192,11 +188,11 @@ msgstr ""
 "csökkentéséhez. Ez a beállítás csak a természetes elhelyezési stratégiára "
 "érvényes."
 
-#: extensions/native-window-placement/org.gnome.shell.extensions.native-window-placement.gschema.xml:11
+#: ../extensions/native-window-placement/org.gnome.shell.extensions.native-window-placement.gschema.xml.in.h:3
 msgid "Place window captions on top"
 msgstr "Ablakfeliratok elhelyezése felül"
 
-#: extensions/native-window-placement/org.gnome.shell.extensions.native-window-placement.gschema.xml:12
+#: ../extensions/native-window-placement/org.gnome.shell.extensions.native-window-placement.gschema.xml.in.h:4
 msgid ""
 "If true, place window captions on top the respective thumbnail, overriding "
 "shell default of placing it at the bottom. Changing this setting requires "
@@ -206,117 +202,116 @@ msgstr ""
 "tetejére helyezi el, az alapértelmezett alja helyett. Ezen beállítás "
 "módosítása a Shell újraindítását igényli."
 
-#: extensions/places-menu/extension.js:78
-#: extensions/places-menu/extension.js:81
+#: ../extensions/places-menu/extension.js:78
+#: ../extensions/places-menu/extension.js:81
 msgid "Places"
 msgstr "Helyek"
 
-#: extensions/places-menu/placeDisplay.js:65
+#: ../extensions/places-menu/placeDisplay.js:57
 #, javascript-format
-msgid "Failed to mount volume for “%s”"
-msgstr "Nem sikerült a kötet csatolása ennél: „%s”"
-
-#: extensions/places-menu/placeDisplay.js:78
-#, javascript-format
-msgid "Failed to launch “%s”"
+msgid "Failed to launch \"%s\""
 msgstr "„%s” indítása meghiúsult"
 
-#: extensions/places-menu/placeDisplay.js:137
-#: extensions/places-menu/placeDisplay.js:160
+#: ../extensions/places-menu/placeDisplay.js:99
+#: ../extensions/places-menu/placeDisplay.js:122
 msgid "Computer"
 msgstr "Számítógép"
 
-#: extensions/places-menu/placeDisplay.js:303
+#: ../extensions/places-menu/placeDisplay.js:200
 msgid "Home"
 msgstr "Saját mappa"
 
-#: extensions/places-menu/placeDisplay.js:347
+#: ../extensions/places-menu/placeDisplay.js:287
 msgid "Browse Network"
 msgstr "Hálózat tallózása"
 
-#: extensions/screenshot-window-sizer/org.gnome.shell.extensions.screenshot-window-sizer.gschema.xml:7
+#: ../extensions/screenshot-window-sizer/org.gnome.shell.extensions.screenshot-window-sizer.gschema.xml.in.h:1
 msgid "Cycle Screenshot Sizes"
 msgstr "Képernyőképméretek végigléptetése"
 
-#: extensions/screenshot-window-sizer/org.gnome.shell.extensions.screenshot-window-sizer.gschema.xml:11
-msgid "Cycle Screenshot Sizes Backward"
-msgstr "Képernyőképméretek végigléptetése visszafelé"
+#: ../extensions/systemMonitor/extension.js:214
+msgid "CPU"
+msgstr "CPU"
 
-#: extensions/user-theme/org.gnome.shell.extensions.user-theme.gschema.xml:5
+#: ../extensions/systemMonitor/extension.js:267
+msgid "Memory"
+msgstr "Memória"
+
+#: ../extensions/user-theme/org.gnome.shell.extensions.user-theme.gschema.xml.in.h:1
 msgid "Theme name"
 msgstr "Témanév"
 
-#: extensions/user-theme/org.gnome.shell.extensions.user-theme.gschema.xml:6
+#: ../extensions/user-theme/org.gnome.shell.extensions.user-theme.gschema.xml.in.h:2
 msgid "The name of the theme, to be loaded from ~/.themes/name/gnome-shell"
 msgstr "A ~/.themes/név/gnome-shell alól betöltendő téma neve"
 
-#: extensions/window-list/extension.js:110
+#: ../extensions/window-list/extension.js:110
 msgid "Close"
 msgstr "Bezárás"
 
-#: extensions/window-list/extension.js:129
+#: ../extensions/window-list/extension.js:120
 msgid "Unminimize"
 msgstr "Minimalizálás megszüntetése"
 
-#: extensions/window-list/extension.js:130
+#: ../extensions/window-list/extension.js:121
 msgid "Minimize"
 msgstr "Minimalizálás"
 
-#: extensions/window-list/extension.js:136
+#: ../extensions/window-list/extension.js:127
 msgid "Unmaximize"
 msgstr "Maximalizálás megszüntetése"
 
-#: extensions/window-list/extension.js:137
+#: ../extensions/window-list/extension.js:128
 msgid "Maximize"
 msgstr "Maximalizálás"
 
-#: extensions/window-list/extension.js:420
+#: ../extensions/window-list/extension.js:390
 msgid "Minimize all"
 msgstr "Minden minimalizálása"
 
-#: extensions/window-list/extension.js:428
+#: ../extensions/window-list/extension.js:398
 msgid "Unminimize all"
 msgstr "Minden minimalizálásának megszüntetése"
 
-#: extensions/window-list/extension.js:436
+#: ../extensions/window-list/extension.js:406
 msgid "Maximize all"
 msgstr "Minden maximalizálása"
 
-#: extensions/window-list/extension.js:445
+#: ../extensions/window-list/extension.js:415
 msgid "Unmaximize all"
 msgstr "Minden maximalizálásának megszüntetése"
 
-#: extensions/window-list/extension.js:454
+#: ../extensions/window-list/extension.js:424
 msgid "Close all"
 msgstr "Minden bezárása"
 
-#: extensions/window-list/extension.js:678
-#: extensions/workspace-indicator/extension.js:30
+#: ../extensions/window-list/extension.js:706
+#: ../extensions/workspace-indicator/extension.js:30
 msgid "Workspace Indicator"
 msgstr "Munkaterület indikátor"
 
-#: extensions/window-list/extension.js:842
+#: ../extensions/window-list/extension.js:869
 msgid "Window List"
 msgstr "Ablaklista"
 
-#: extensions/window-list/org.gnome.shell.extensions.window-list.gschema.xml:12
+#: ../extensions/window-list/org.gnome.shell.extensions.window-list.gschema.xml.in.h:1
 msgid "When to group windows"
 msgstr "Mikor legyenek az ablakok csoportosítva"
 
-#: extensions/window-list/org.gnome.shell.extensions.window-list.gschema.xml:13
+#: ../extensions/window-list/org.gnome.shell.extensions.window-list.gschema.xml.in.h:2
 msgid ""
 "Decides when to group windows from the same application on the window list. "
-"Possible values are “never”, “auto” and “always”."
+"Possible values are \"never\", \"auto\" and \"always\"."
 msgstr ""
 "Megadja, mikor csoportosítsa az Ablaklista kisalkalmazás egyazon alkalmazás "
 "ablakait. Lehetséges értékek „never” (soha), „auto” (automatikus) és "
 "„always” (mindig)."
 
-#: extensions/window-list/org.gnome.shell.extensions.window-list.gschema.xml:20
+#: ../extensions/window-list/org.gnome.shell.extensions.window-list.gschema.xml.in.h:3
 msgid "Show the window list on all monitors"
 msgstr "Az ablaklista megjelenítése minden monitoron"
 
-#: extensions/window-list/org.gnome.shell.extensions.window-list.gschema.xml:21
+#: ../extensions/window-list/org.gnome.shell.extensions.window-list.gschema.xml.in.h:4
 msgid ""
 "Whether to show the window list on all connected monitors or only on the "
 "primary one."
@@ -324,35 +319,240 @@ msgstr ""
 "Megjelenjen-e az ablaklista minden csatlakoztatott monitoron vagy csak az "
 "elsődlegesen."
 
-#: extensions/window-list/prefs.js:32
+#: ../extensions/window-list/prefs.js:32
 msgid "Window Grouping"
 msgstr "Ablakcsoportosítás"
 
-#: extensions/window-list/prefs.js:50
+#: ../extensions/window-list/prefs.js:50
 msgid "Never group windows"
 msgstr "Soha ne csoportosítsa az ablakokat"
 
-#: extensions/window-list/prefs.js:51
+#: ../extensions/window-list/prefs.js:51
 msgid "Group windows when space is limited"
 msgstr "Ablakok csoportosítása, ha kevés a hely"
 
-#: extensions/window-list/prefs.js:52
+#: ../extensions/window-list/prefs.js:52
 msgid "Always group windows"
 msgstr "Mindig csoportosítsa az ablakokat"
 
-#: extensions/window-list/prefs.js:75
+#: ../extensions/window-list/prefs.js:75
 msgid "Show on all monitors"
 msgstr "Megjelenítés minden monitoron"
 
-#: extensions/workspace-indicator/prefs.js:141
+#: ../extensions/workspace-indicator/prefs.js:141
 msgid "Workspace Names"
 msgstr "Munkaterületnevek"
 
-#: extensions/workspace-indicator/prefs.js:157
+#: ../extensions/workspace-indicator/prefs.js:157
 msgid "Name"
 msgstr "Név"
 
-#: extensions/workspace-indicator/prefs.js:198
+#: ../extensions/workspace-indicator/prefs.js:198
 #, javascript-format
 msgid "Workspace %d"
 msgstr "%d. munkaterület"
+
+#~ msgid "GNOME Shell Classic"
+#~ msgstr "Klasszikus GNOME Shell"
+
+#~ msgid "Window management and application launching"
+#~ msgstr "Ablakkezelés és alkalmazásindítás"
+
+#~ msgid "Normal"
+#~ msgstr "Normál"
+
+#~ msgid "Left"
+#~ msgstr "Balra"
+
+#~ msgid "Right"
+#~ msgstr "Jobbra"
+
+#~ msgid "Upside-down"
+#~ msgstr "Fejjel lefelé"
+
+#~ msgid "Display"
+#~ msgstr "Kijelző"
+
+#~ msgid "Display Settings"
+#~ msgstr "Kijelzőbeállítások"
+
+#~ msgid "Suspend"
+#~ msgstr "Felfüggesztés"
+
+#~ msgid "Hibernate"
+#~ msgstr "Hibernálás"
+
+#~ msgid "Power Off"
+#~ msgstr "Kikapcsolás"
+
+#~ msgid "Enable suspending"
+#~ msgstr "Felfüggesztés engedélyezése"
+
+#~ msgid "Control the visibility of the Suspend menu item"
+#~ msgstr "A Felfüggesztés menüelem láthatóságának módosítása"
+
+#~ msgid "Enable hibernating"
+#~ msgstr "Hibernálás engedélyezése"
+
+#~ msgid "Control the visibility of the Hibernate menu item"
+#~ msgstr "A Hibernálás menüelem láthatóságának módosítása"
+
+#~ msgid "Devices"
+#~ msgstr "Eszközök"
+
+#~ msgid "Bookmarks"
+#~ msgstr "Könyvjelzők"
+
+#~ msgid "Network"
+#~ msgstr "Hálózat"
+
+#~ msgid "File System"
+#~ msgstr "Fájlrendszer"
+
+#~ msgid "The application icon mode."
+#~ msgstr "Az alkalmazásikon módja."
+
+#~ msgid ""
+#~ "Configures how the windows are shown in the switcher. Valid possibilities "
+#~ "are 'thumbnail-only' (shows a thumbnail of the window), 'app-icon-"
+#~ "only' (shows only the application icon) or 'both'."
+#~ msgstr ""
+#~ "Az ablakok megjelenésének beállítása a váltóban. Lehetséges értékek: "
+#~ "„thumbnail-only” (az ablak bélyegképének megjelenítése), „app-icon-"
+#~ "only” (az alkalmazás ikonjának megjelenítése) vagy „both” (mindkettő)."
+
+#~ msgid "Drag here to add favorites"
+#~ msgstr "Húzza ide kedvenceit"
+
+#~ msgid "New Window"
+#~ msgstr "Új ablak"
+
+#~ msgid "Quit Application"
+#~ msgstr "Alkalmazás bezárása"
+
+#~ msgid "Remove from Favorites"
+#~ msgstr "Eltávolítás a Kedvencek közül"
+
+#~ msgid "Position of the dock"
+#~ msgstr "A dokk pozíciója"
+
+#~ msgid ""
+#~ "Sets the position of the dock in the screen. Allowed values are 'right' "
+#~ "or 'left'"
+#~ msgstr ""
+#~ "A dokk pozíciója a képernyőn. Lehetséges értékek: „right” (jobb) vagy "
+#~ "„left” (bal)"
+
+#~ msgid "Icon size"
+#~ msgstr "Ikonméret"
+
+#~ msgid "Sets icon size of the dock."
+#~ msgstr "Az ikonméret megadása a dokkon."
+
+#~ msgid "Enable/disable autohide"
+#~ msgstr "Automatikus rejtés engedélyezése vagy tiltása"
+
+#~ msgid "Autohide effect"
+#~ msgstr "Automatikus rejtés effektusa"
+
+#~ msgid ""
+#~ "Sets the effect of the hide dock. Allowed values are 'resize', 'rescale' "
+#~ "and 'move'"
+#~ msgstr ""
+#~ "A dokk elrejtésének effektusa. Lehetséges értékek: "
+#~ "„resize” (átméretezés), „rescale” (újraméretezés) és „move” (áthelyezés)"
+
+#~ msgid "Autohide duration"
+#~ msgstr "Automatikus rejtés hossza"
+
+#~ msgid "Sets the time duration of the autohide effect."
+#~ msgstr "Az automatikus rejtés effektus hosszának beállítása."
+
+#~ msgid "Monitor"
+#~ msgstr "Monitor"
+
+#~ msgid ""
+#~ "Sets monitor to display dock in. The default value (-1) is the primary "
+#~ "monitor."
+#~ msgstr ""
+#~ "A dokk megjelenítése ezen a monitoron. Az alapértelmezett érték (-1) az "
+#~ "elsődleges monitor."
+
+#~ msgid "%s is away."
+#~ msgstr "%s távol van."
+
+#~ msgid "%s is offline."
+#~ msgstr "%s kilépett."
+
+#~ msgid "%s is online."
+#~ msgstr "%s elérhető."
+
+#~ msgid "%s is busy."
+#~ msgstr "%s elfoglalt."
+
+#~ msgid ""
+#~ "Sets the Alt-Tab behaviour. Possible values are: all_thumbnails and "
+#~ "workspace_icons. See the configuration dialogs for details."
+#~ msgstr ""
+#~ "Az Alt-Tab viselkedésének megadása. Lehetséges értékek: all_thumbnails és "
+#~ "workspace_icons. Részletekért lásd a beállítóablakokat."
+
+#~ msgid "The alt tab behaviour."
+#~ msgstr "Az Alt-Tab viselkedése."
+
+#~ msgid ""
+#~ "This mode presents all applications from all workspaces in one selection "
+#~ "list. Instead of using the application icon of every window, it uses "
+#~ "small thumbnails resembling the window itself."
+#~ msgstr ""
+#~ "Ez a mód minden munkaterület alkalmazásait egy kijelölőlistában jeleníti "
+#~ "meg. Minden ablak alkalmazásikonjának használata helyett kis "
+#~ "bélyegképeket használ, amelyek magára az ablakra hasonlítanak."
+
+#~ msgid "Workspace & Icons"
+#~ msgstr "Munkaterület és ikonok"
+
+#~ msgid ""
+#~ "This mode let's you switch between the applications of your current "
+#~ "workspace and gives you additionally the option to switch to the last "
+#~ "used application of your previous workspace. This is always the last "
+#~ "symbol in the list and is segregated by a separator/vertical line if "
+#~ "available. \n"
+#~ "Every window is represented by its application icon."
+#~ msgstr ""
+#~ "Ez a mód lehetővé teszi a váltást a jelenlegi munkaterület alkalmazásai "
+#~ "között, és lehetővé teszi az előző munkaterület utoljára használt "
+#~ "alkalmazására váltást. Ez mindig a lista utolsó eleme, és egy elválasztó/"
+#~ "függőleges vonal választja el, ha elérhető.\n"
+#~ "Minden ablakot az alkalmazásikonja jelképez."
+
+#~ msgid "Move current selection to front before closing the popup"
+#~ msgstr "Aktuális kijelölés előtérbe hozása a felugró ablak bezárása előtt"
+
+#~ msgid ""
+#~ "The Alternate Tab can be used in different modes, that affect the way "
+#~ "windows are chosen and presented."
+#~ msgstr ""
+#~ "A váltás lap különböző módokon használható, amelyek befolyásolják az "
+#~ "ablakok kiválasztásának és megjelenítésének módját."
+
+#~ msgid "Configure display settings..."
+#~ msgstr "Kijelzőbeállítások…"
+
+#~ msgid "Available"
+#~ msgstr "Elérhető"
+
+#~ msgid "Busy"
+#~ msgstr "Elfoglalt"
+
+#~ msgid "My Account"
+#~ msgstr "Saját fiók"
+
+#~ msgid "Lock Screen"
+#~ msgstr "Képernyő zárolása"
+
+#~ msgid "Switch User"
+#~ msgstr "Felhasználóváltás"
+
+#~ msgid "Log Out..."
+#~ msgstr "Kijelentkezés…"

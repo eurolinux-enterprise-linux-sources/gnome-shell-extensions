@@ -1,0 +1,460 @@
+From 5aad5b8cb31833cb2db12cd0b9c2c4daceb93536 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Florian=20M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Wed, 15 Mar 2017 05:16:49 +0100
+Subject: [PATCH 1/5] apps-menu: Use Map to keep track of app items
+
+The use of Array to keep track of inserted items is extremely
+confusing, as no elements are ever added to the array. What
+the code actually does is monkey-patching properties into an
+empty object (that happens to be of type "Array"). While the
+direct idiomatic replacement would be {}, update the code to
+use a proper map instead.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=780371
+---
+ extensions/apps-menu/extension.js | 14 ++++++++------
+ 1 file changed, 8 insertions(+), 6 deletions(-)
+
+diff --git a/extensions/apps-menu/extension.js b/extensions/apps-menu/extension.js
+index c840a06..5f44b42 100644
+--- a/extensions/apps-menu/extension.js
++++ b/extensions/apps-menu/extension.js
+@@ -296,6 +296,7 @@ const ApplicationsButton = new Lang.Class({
+                                    Lang.bind(this, this._setKeybinding));
+         this._setKeybinding();
+ 
++        this._applicationsButtons = new Map();
+         this.reloadFlag = false;
+         this._createLayout();
+         this._display();
+@@ -504,7 +505,7 @@ const ApplicationsButton = new Lang.Class({
+     },
+ 
+     _display: function() {
+-        this._applicationsButtons = new Array();
++        this._applicationsButtons.clear();
+         this.mainBox.style=('width: 35em;');
+         this.mainBox.hide();
+ 
+@@ -563,12 +564,13 @@ const ApplicationsButton = new Lang.Class({
+          if (apps) {
+             for (let i = 0; i < apps.length; i++) {
+                let app = apps[i];
+-               if (!this._applicationsButtons[app]) {
+-                  let applicationMenuItem = new ApplicationMenuItem(this, app);
+-                  this._applicationsButtons[app] = applicationMenuItem;
++               let item = this._applicationsButtons.get(app);
++               if (!item) {
++                  item = new ApplicationMenuItem(this, app);
++                  this._applicationsButtons.set(app, item);
+                }
+-               if (!this._applicationsButtons[app].actor.get_parent())
+-                  this.applicationsBox.add_actor(this._applicationsButtons[app].actor);
++               if (!item.actor.get_parent())
++                  this.applicationsBox.add_actor(item.actor);
+             }
+          }
+     },
+-- 
+2.12.2
+
+
+From 7ed3f8618af00d6d0fb1440b6668d336b2b611d0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Florian=20M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Wed, 15 Mar 2017 01:30:53 +0100
+Subject: [PATCH 2/5] apps-menu: Allow creating desktop launchers via DND
+
+Back in the olden days, it used to be possible to drag items from
+the application menu to the desktop to create a launcher shortcut.
+Reimplement that "classic" functionality in the apps menu extension.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=780371
+---
+ extensions/apps-menu/extension.js | 116 +++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 115 insertions(+), 1 deletion(-)
+
+diff --git a/extensions/apps-menu/extension.js b/extensions/apps-menu/extension.js
+index 5f44b42..160975d 100644
+--- a/extensions/apps-menu/extension.js
++++ b/extensions/apps-menu/extension.js
+@@ -1,6 +1,7 @@
+ /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
+ 
+ const Atk = imports.gi.Atk;
++const DND = imports.ui.dnd;
+ const Gio = imports.gi.Gio;
+ const GMenu = imports.gi.GMenu;
+ const Lang = imports.lang;
+@@ -8,6 +9,7 @@ const Shell = imports.gi.Shell;
+ const St = imports.gi.St;
+ const Clutter = imports.gi.Clutter;
+ const Main = imports.ui.main;
++const Meta = imports.gi.Meta;
+ const PanelMenu = imports.ui.panelMenu;
+ const PopupMenu = imports.ui.popupMenu;
+ const Gtk = imports.gi.Gtk;
+@@ -73,6 +75,16 @@ const ApplicationMenuItem = new Lang.Class({
+                 textureCache.disconnect(iconThemeChangedId);
+             }));
+         this._updateIcon();
++
++        this.actor._delegate = this;
++        let draggable = DND.makeDraggable(this.actor);
++
++        draggable.connect('drag-begin', () => {
++            Shell.util_set_hidden_from_pick(Main.legacyTray.actor, true);
++        });
++        draggable.connect('drag-end', () => {
++            Shell.util_set_hidden_from_pick(Main.legacyTray.actor, false);
++        });
+     },
+ 
+     activate: function(event) {
+@@ -88,8 +100,16 @@ const ApplicationMenuItem = new Lang.Class({
+         this.parent(active, params);
+     },
+ 
++    getDragActor: function() {
++        return this._app.create_icon_texture(APPLICATION_ICON_SIZE);
++    },
++
++    getDragActorSource: function() {
++        return this._iconBin;
++    },
++
+     _updateIcon: function() {
+-        this._iconBin.set_child(this._app.create_icon_texture(APPLICATION_ICON_SIZE));
++        this._iconBin.set_child(this.getDragActor());
+     }
+ });
+ 
+@@ -251,6 +271,93 @@ const ApplicationsMenu = new Lang.Class({
+     }
+ });
+ 
++const DesktopTarget = new Lang.Class({
++    Name: 'DesktopTarget',
++
++    _init: function() {
++        this._desktopDestroyedId = 0;
++
++        this._windowAddedId =
++            global.window_group.connect('actor-added',
++                                        Lang.bind(this, this._onWindowAdded));
++
++        global.get_window_actors().forEach(a => {
++            this._onWindowAdded(a.get_parent(), a);
++        });
++    },
++
++    _onWindowAdded: function(group, actor) {
++        if (!(actor instanceof Meta.WindowActor))
++            return;
++
++        if (actor.meta_window.get_window_type() == Meta.WindowType.DESKTOP)
++            this._setDesktop(actor);
++    },
++
++    _setDesktop: function(desktop) {
++        if (this._desktop) {
++            this._desktop.disconnect(this._desktopDestroyedId);
++            this._desktopDestroyedId = 0;
++
++            delete this._desktop._delegate;
++        }
++
++        this._desktop = desktop;
++
++        if (this._desktop) {
++            this._desktopDestroyedId = this._desktop.connect('destroy', () => {
++                this._setDesktop(null);
++            });
++            this._desktop._delegate = this;
++        }
++    },
++
++    _getSourceAppInfo: function(source) {
++        if (!(source instanceof ApplicationMenuItem))
++            return null;
++        return source._app.app_info;
++    },
++
++    destroy: function() {
++        if (this._windowAddedId)
++            global.window_group.disconnect(this._windowAddedId);
++        this._windowAddedId = 0;
++
++        this._setDesktop(null);
++    },
++
++    handleDragOver: function(source, actor, x, y, time) {
++        let appInfo = this._getSourceAppInfo(source);
++        if (!appInfo)
++            return DND.DragMotionResult.CONTINUE;
++
++        return DND.DragMotionResult.COPY_DROP;
++    },
++
++    acceptDrop: function(source, actor, x, y, time) {
++        let appInfo = this._getSourceAppInfo(source);
++        if (!appInfo)
++            return false;
++
++        this.emit('app-dropped');
++
++        let desktop = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DESKTOP);
++
++        let src = Gio.File.new_for_path(appInfo.get_filename());
++        let dst = Gio.File.new_for_path(GLib.build_filenamev([desktop, src.get_basename()]));
++
++        try {
++            // copy_async() isn't introspectable :-(
++            src.copy(dst, Gio.FileCopyFlags.OVERWRITE, null, null);
++        } catch(e) {
++            log('Failed to copy to desktop: ' + e.message);
++        }
++
++        return true;
++    }
++});
++Signals.addSignalMethods(DesktopTarget.prototype);
++
+ const ApplicationsButton = new Lang.Class({
+     Name: 'ApplicationsButton',
+     Extends: PanelMenu.Button,
+@@ -296,6 +403,11 @@ const ApplicationsButton = new Lang.Class({
+                                    Lang.bind(this, this._setKeybinding));
+         this._setKeybinding();
+ 
++        this._desktopTarget = new DesktopTarget();
++        this._desktopTarget.connect('app-dropped', () => {
++            this.menu.close();
++        });
++
+         this._applicationsButtons = new Map();
+         this.reloadFlag = false;
+         this._createLayout();
+@@ -340,6 +452,8 @@ const ApplicationsButton = new Lang.Class({
+                                            Main.sessionMode.hasOverview ?
+                                            Lang.bind(Main.overview, Main.overview.toggle) :
+                                            null);
++
++        this._desktopTarget.destroy();
+     },
+ 
+     _onCapturedEvent: function(actor, event) {
+-- 
+2.12.2
+
+
+From c90b4ec5daf6d3906360e61330a7aa386470d65b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Florian=20M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Wed, 15 Mar 2017 05:23:57 +0100
+Subject: [PATCH 3/5] apps-menu: Only enable DND when there's a desktop
+
+It's not very useful to allow dragging when there's no drop target,
+so tie the functionality added in the previous commit to the presence
+of a DESKTOP window.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=780371
+---
+ extensions/apps-menu/extension.js | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/extensions/apps-menu/extension.js b/extensions/apps-menu/extension.js
+index 160975d..a013a3e 100644
+--- a/extensions/apps-menu/extension.js
++++ b/extensions/apps-menu/extension.js
+@@ -79,6 +79,13 @@ const ApplicationMenuItem = new Lang.Class({
+         this.actor._delegate = this;
+         let draggable = DND.makeDraggable(this.actor);
+ 
++        let maybeStartDrag = draggable._maybeStartDrag;
++        draggable._maybeStartDrag = (event) => {
++            if (this._dragEnabled)
++                return maybeStartDrag.call(draggable, event);
++            return false;
++        };
++
+         draggable.connect('drag-begin', () => {
+             Shell.util_set_hidden_from_pick(Main.legacyTray.actor, true);
+         });
+@@ -100,6 +107,13 @@ const ApplicationMenuItem = new Lang.Class({
+         this.parent(active, params);
+     },
+ 
++    setDragEnabled: function(enable) {
++        if (this._dragEnabled == enable)
++            return;
++
++        this._dragEnabled = enable;
++    },
++
+     getDragActor: function() {
+         return this._app.create_icon_texture(APPLICATION_ICON_SIZE);
+     },
+@@ -286,6 +300,10 @@ const DesktopTarget = new Lang.Class({
+         });
+     },
+ 
++    get hasDesktop() {
++        return this._desktop != null;
++    },
++
+     _onWindowAdded: function(group, actor) {
+         if (!(actor instanceof Meta.WindowActor))
+             return;
+@@ -303,6 +321,7 @@ const DesktopTarget = new Lang.Class({
+         }
+ 
+         this._desktop = desktop;
++        this.emit('desktop-changed');
+ 
+         if (this._desktop) {
+             this._desktopDestroyedId = this._desktop.connect('destroy', () => {
+@@ -407,6 +426,10 @@ const ApplicationsButton = new Lang.Class({
+         this._desktopTarget.connect('app-dropped', () => {
+             this.menu.close();
+         });
++        this._desktopTarget.connect('desktop-changed', () => {
++            for (let item of this._applicationsButtons.values())
++                item.setDragEnabled(this._desktopTarget.hasDesktop);
++        });
+ 
+         this._applicationsButtons = new Map();
+         this.reloadFlag = false;
+@@ -681,6 +704,7 @@ const ApplicationsButton = new Lang.Class({
+                let item = this._applicationsButtons.get(app);
+                if (!item) {
+                   item = new ApplicationMenuItem(this, app);
++                  item.setDragEnabled(this._desktopTarget.hasDesktop);
+                   this._applicationsButtons.set(app, item);
+                }
+                if (!item.actor.get_parent())
+-- 
+2.12.2
+
+
+From f88c53b1a31e3937cbcb5e15f77a385f063bc04f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Florian=20M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Fri, 21 Apr 2017 23:54:41 +0200
+Subject: [PATCH 4/5] apps-menu: Mark copied .desktop files as trusted
+
+The application can already be launched from the menu without further
+confirmation from the user, so there is no security gain in asking the
+user to trust it when launched from the desktop - just set the appropriate
+attributes of the newly copied file to mark it as trusted to nautilus.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=781596
+---
+ extensions/apps-menu/extension.js | 25 +++++++++++++++++++++++++
+ 1 file changed, 25 insertions(+)
+
+diff --git a/extensions/apps-menu/extension.js b/extensions/apps-menu/extension.js
+index a013a3e..665cc71 100644
+--- a/extensions/apps-menu/extension.js
++++ b/extensions/apps-menu/extension.js
+@@ -337,6 +337,30 @@ const DesktopTarget = new Lang.Class({
+         return source._app.app_info;
+     },
+ 
++    _markTrusted: function(file) {
++        let modeAttr = Gio.FILE_ATTRIBUTE_UNIX_MODE;
++        let trustedAttr = 'metadata::trusted';
++        let queryFlags = Gio.FileQueryInfoFlags.NONE;
++        let ioPriority = GLib.PRIORITY_DEFAULT;
++
++        file.query_info_async(modeAttr, queryFlags, ioPriority, null,
++            (o, res) => {
++                try {
++                    let info = o.query_info_finish(res);
++                    let mode = info.get_attribute_uint32(modeAttr) | 0100;
++
++                    info.set_attribute_uint32(modeAttr, mode);
++                    info.set_attribute_string(trustedAttr, 'yes');
++                    file.set_attributes_async (info, queryFlags, ioPriority, null,
++                        (o, res) => {
++                            o.set_attributes_finish(res);
++                        });
++                } catch(e) {
++                    log('Failed to mark file as trusted: ' + e.message);
++                }
++            });
++    },
++
+     destroy: function() {
+         if (this._windowAddedId)
+             global.window_group.disconnect(this._windowAddedId);
+@@ -368,6 +392,7 @@ const DesktopTarget = new Lang.Class({
+         try {
+             // copy_async() isn't introspectable :-(
+             src.copy(dst, Gio.FileCopyFlags.OVERWRITE, null, null);
++            this._markTrusted(dst);
+         } catch(e) {
+             log('Failed to copy to desktop: ' + e.message);
+         }
+-- 
+2.12.2
+
+
+From 7c91918e6c7cea50f1d1f6fc25c24154b495c104 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Florian=20M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Sat, 22 Apr 2017 00:21:37 +0200
+Subject: [PATCH 5/5] apps-menu: 'Touch' copied .desktop file after updating
+ attributes
+
+At least for now, nautilus' file monitor is blind to certain metadata
+updates:
+https://git.gnome.org/browse/nautilus/tree/src/nautilus-mime-actions.c#n1537
+
+So in order for the changes in the previous patch to take effect
+immediately, we need to force nautilus to reload the file info.
+Achieve this by updating the access time of the newly copied file
+after marking it as trusted.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=781596
+---
+ extensions/apps-menu/extension.js | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/extensions/apps-menu/extension.js b/extensions/apps-menu/extension.js
+index 665cc71..d2613c5 100644
+--- a/extensions/apps-menu/extension.js
++++ b/extensions/apps-menu/extension.js
+@@ -337,6 +337,23 @@ const DesktopTarget = new Lang.Class({
+         return source._app.app_info;
+     },
+ 
++    _touchFile: function(file) {
++        let queryFlags = Gio.FileQueryInfoFlags.NONE;
++        let ioPriority = GLib.PRIORITY_DEFAULT;
++
++        let info = new Gio.FileInfo();
++        info.set_attribute_uint64(Gio.FILE_ATTRIBUTE_TIME_ACCESS,
++                                  GLib.get_real_time());
++        file.set_attributes_async (info, queryFlags, ioPriority, null,
++            (o, res) => {
++                try {
++                    o.set_attributes_finish(res);
++                } catch(e) {
++                    log('Failed to update access time: ' + e.message);
++                }
++            });
++    },
++
+     _markTrusted: function(file) {
+         let modeAttr = Gio.FILE_ATTRIBUTE_UNIX_MODE;
+         let trustedAttr = 'metadata::trusted';
+@@ -354,6 +371,9 @@ const DesktopTarget = new Lang.Class({
+                     file.set_attributes_async (info, queryFlags, ioPriority, null,
+                         (o, res) => {
+                             o.set_attributes_finish(res);
++
++                            // Hack: force nautilus to reload file info
++                            this._touchFile(file);
+                         });
+                 } catch(e) {
+                     log('Failed to mark file as trusted: ' + e.message);
+-- 
+2.12.2
+

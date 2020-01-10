@@ -3,6 +3,7 @@
 
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
+const Lang = imports.lang;
 const Main = imports.ui.main;
 
 const SETTINGS_KEY = 'name';
@@ -11,17 +12,19 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
 
-class ThemeManager {
-    constructor() {
+const ThemeManager = new Lang.Class({
+    Name: 'UserTheme.ThemeManager',
+
+    _init: function() {
         this._settings = Convenience.getSettings();
-    }
+    },
 
-    enable() {
-        this._changedId = this._settings.connect('changed::'+SETTINGS_KEY, this._changeTheme.bind(this));
+    enable: function() {
+        this._changedId = this._settings.connect('changed::'+SETTINGS_KEY, Lang.bind(this, this._changeTheme));
         this._changeTheme();
-    }
+    },
 
-    disable() {
+    disable: function() {
         if (this._changedId) {
             this._settings.disconnect(this._changedId);
             this._changedId = 0;
@@ -29,9 +32,9 @@ class ThemeManager {
 
         Main.setThemeStylesheet(null);
         Main.loadTheme();
-    }
+    },
 
-    _changeTheme() {
+    _changeTheme: function() {
         let _stylesheet = null;
         let _themeName = this._settings.get_string(SETTINGS_KEY);
 
@@ -61,7 +64,7 @@ class ThemeManager {
         Main.setThemeStylesheet(_stylesheet);
         Main.loadTheme();
     }
-};
+});
 
 function init() {
     return new ThemeManager();

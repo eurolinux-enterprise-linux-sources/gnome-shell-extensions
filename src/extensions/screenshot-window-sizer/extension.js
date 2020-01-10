@@ -84,7 +84,11 @@ function cycleScreenshotSizes(display, screen, window, binding) {
 
     // Double both axes if on a hidpi display
     let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
-    let scaledSizes = SIZES.map(size => size.map(wh => wh * scaleFactor));
+    let scaledSizes = SIZES.map(function(size) {
+        return size.map(function(wh) {
+            return wh * scaleFactor;
+        });
+    });
 
     // Find the nearest 16:9 size for the current window size
     let nearestIndex;
@@ -143,18 +147,11 @@ function init() {
 function enable() {
     Main.wm.addKeybinding('cycle-screenshot-sizes',
                           Convenience.getSettings(),
-                          Meta.KeyBindingFlags.PER_WINDOW,
-                          Shell.ActionMode.NORMAL,
-                          cycleScreenshotSizes);
-    Main.wm.addKeybinding('cycle-screenshot-sizes-backward',
-                          Convenience.getSettings(),
-                          Meta.KeyBindingFlags.PER_WINDOW |
-                          Meta.KeyBindingFlags.IS_REVERSED,
+                          Meta.KeyBindingFlags.PER_WINDOW | Meta.KeyBindingFlags.REVERSES,
                           Shell.ActionMode.NORMAL,
                           cycleScreenshotSizes);
 }
 
 function disable() {
     Main.wm.removeKeybinding('cycle-screenshot-sizes');
-    Main.wm.removeKeybinding('cycle-screenshot-sizes-backward');
 }

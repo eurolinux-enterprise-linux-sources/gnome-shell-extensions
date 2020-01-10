@@ -1,0 +1,86 @@
+From a382e21acd24a1002fbcc160aa7591ff99b191e6 Mon Sep 17 00:00:00 2001
+From: Ray Strode <rstrode@redhat.com>
+Date: Mon, 26 Jun 2017 14:44:06 -0400
+Subject: [PATCH] loginDialog: make info messages themed
+
+They were lacking a definition before leading them to
+show up invisible.
+---
+ data/gnome-classic.css | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/data/gnome-classic.css b/data/gnome-classic.css
+index f1a004d..30c7fca 100644
+--- a/data/gnome-classic.css
++++ b/data/gnome-classic.css
+@@ -1599,63 +1599,65 @@ StScrollBar {
+         box-shadow: inset 0 1px #5d696d;
+         text-shadow: 0 1px black;
+         icon-shadow: 0 1px black; }
+       .login-dialog .modal-dialog-button:default:active {
+         color: white;
+         border-color: rgba(0, 0, 0, 0.7);
+         background-color: #3583d5;
+         box-shadow: inset 0 0 black;
+         text-shadow: none;
+         icon-shadow: none; }
+       .login-dialog .modal-dialog-button:default:insensitive {
+         color: #8e9192;
+         border-color: rgba(0, 0, 0, 0.7);
+         background-color: rgba(65, 71, 72, 0.7);
+         box-shadow: none;
+         text-shadow: none;
+         icon-shadow: none; }
+ 
+ .login-dialog-logo-bin {
+   padding: 24px 0px; }
+ 
+ .login-dialog-banner {
+   color: #d6d6d1; }
+ 
+ .login-dialog-button-box {
+   spacing: 5px; }
+ 
+ .login-dialog-message-warning {
+   color: #f57900; }
+ 
+-.login-dialog-message-hint {
++.login-dialog-message-hint, .login-dialog-message {
++  color: #bebeb6;
+   padding-top: 0;
+-  padding-bottom: 20px; }
++  padding-bottom: 20px;
++  min-height: 2.75em; }
+ 
+ .login-dialog-user-selection-box {
+   padding: 100px 0px; }
+   .login-dialog-user-selection-box .login-dialog-not-listed-label {
+     padding-left: 2px; }
+     .login-dialog-not-listed-button:focus .login-dialog-user-selection-box .login-dialog-not-listed-label, .login-dialog-not-listed-button:hover .login-dialog-user-selection-box .login-dialog-not-listed-label {
+       color: #eeeeec; }
+ 
+ .login-dialog-not-listed-label {
+   font-size: 90%;
+   font-weight: bold;
+   color: #a6a69b;
+   padding-top: 1em; }
+ 
+ .login-dialog-user-list-view {
+   -st-vfade-offset: 1em; }
+ 
+ .login-dialog-user-list {
+   spacing: 12px;
+   padding: .2em;
+   width: 23em; }
+   .login-dialog-user-list:expanded .login-dialog-user-list-item:focus {
+     background-color: #4a90d9;
+     color: #ffffff; }
+   .login-dialog-user-list:expanded .login-dialog-user-list-item:logged-in {
+     border-right: 2px solid #4a90d9; }
+ 
+ .login-dialog-user-list-item {
+   border-radius: 5px;
+   padding: .2em;
+-- 
+2.13.0
+

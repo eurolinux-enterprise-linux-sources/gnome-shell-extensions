@@ -5,8 +5,8 @@
 %global pkg_prefix gnome-shell-extension
 
 Name:           gnome-shell-extensions
-Version:        3.28.1
-Release:        7%{?dist}
+Version:        3.22.2
+Release:        10%{?dist}
 Summary:        Modify and extend GNOME Shell functionality and behavior
 
 Group:          User Interface/Desktops
@@ -14,29 +14,22 @@ Group:          User Interface/Desktops
 License:        GPLv2+ and BSD
 URL:            http://wiki.gnome.org/Projects/GnomeShell/Extensions
 Source0:        http://ftp.gnome.org/pub/GNOME/sources/%{name}/%{major_version}/%{name}-%{version}.tar.xz
-Source2:        https://github.com/sass/sassc/archive/3.4.1.tar.gz
-Source3:        https://github.com/sass/libsass/archive/3.4.5.tar.gz
 # BuildRequires:  gnome-common
-BuildRequires:  meson
-BuildRequires:  ruby
+BuildRequires:  autoconf automake
 BuildRequires:  gettext >= 0.19.6
-BuildRequires:  git
 BuildRequires:  pkgconfig(gnome-desktop-3.0)
 BuildRequires:  pkgconfig(libgtop-2.0)
 Requires:       gnome-shell >= %{min_gs_version}
 BuildArch:      noarch
 
-Patch1: 0001-Update-style.patch
-Patch2: 0001-classic-Shade-panel-in-overview.patch
-Patch3: 0001-apps-menu-add-logo-icon-to-Applications-menu.patch
-Patch4: add-extra-extensions.patch
-Patch5: 0001-apps-menu-Explicitly-set-label_actor.patch
-Patch6: resurrect-system-monitor.patch
-Patch7: 0001-data-drop-app-icon-styling.patch
-Patch11: 0001-Include-top-icons-in-classic-session.patch
-Patch12: 0001-window-list-drop-button-grab-when-leaving-button.patch
-
-Patch99: 0001-Revert-data-Remove-nautilus-classic.patch
+Patch1: 0001-classic-shade-panel-in-overview.patch
+Patch2: 0001-apps-menu-add-logo-icon-to-Applications-menu.patch
+Patch3: add-extra-extensions.patch
+Patch4: 0001-apps-menu-Explicitly-set-label_actor.patch
+Patch5: 0001-window-list-Hide-workspace-indicator-when-there-s-1-.patch
+Patch6: apps-menu-desktop-dnd.patch
+Patch7: resurrect-system-monitor.patch
+Patch8: 0001-loginDialog-make-info-messages-themed.patch
 
 %description
 GNOME Shell Extensions is a collection of extensions providing additional and
@@ -89,7 +82,6 @@ Requires:       %{pkg_prefix}-alternate-tab = %{version}-%{release}
 Requires:       %{pkg_prefix}-apps-menu = %{version}-%{release}
 Requires:       %{pkg_prefix}-launch-new-instance = %{version}-%{release}
 Requires:       %{pkg_prefix}-places-menu = %{version}-%{release}
-Requires:       %{pkg_prefix}-top-icons = %{version}-%{release}
 Requires:       %{pkg_prefix}-window-list = %{version}-%{release}
 Requires:       nautilus
 # Obsolete fallback mode components
@@ -151,16 +143,6 @@ Requires:       %{pkg_prefix}-common = %{version}-%{release}
 This GNOME Shell extension makes the dash available outside the activities overview.
 
 
-%package -n %{pkg_prefix}-disable-screenshield
-Summary:        Disable GNOME Shell screen shield if lock is disabled
-Group:          User Interface/Desktops
-License:        GPLv2+
-Requires:       %{pkg_prefix}-common = %{version}-%{release}
-
-%description -n %{pkg_prefix}-disable-screenshield
-This GNOME Shell extension disabled the screen shield if screen locking is disabled.
-
-
 %package -n %{pkg_prefix}-drive-menu
 Summary:        Drive status menu for GNOME Shell
 Group:          User Interface/Desktops
@@ -192,16 +174,6 @@ Requires:       %{pkg_prefix}-common = %{version}-%{release}
 %description  -n %{pkg_prefix}-native-window-placement
 This GNOME Shell extension provides additional configurability for the window
 layout in the overview, including a mechanism similar to KDE4.
-
-
-%package -n %{pkg_prefix}-no-hot-corner
-Summary:        Disable the hot corner in GNOME Shell
-Group:          User Interface/Desktops
-License:        GPLv2+
-Requires:       %{pkg_prefix}-common = %{version}-%{release}
-
-%description  -n %{pkg_prefix}-no-hot-corner
-This GNOME Shell extension disables the hot corner in the top bar.
 
 
 %package -n %{pkg_prefix}-panel-favorites
@@ -279,16 +251,6 @@ This GNOME Shell extension enables loading a GNOME Shell theme from
 ~/.themes/<name>/gnome-shell/.
 
 
-%package -n %{pkg_prefix}-window-grouper
-Summary:        Keep windows that belong to the same process on the same workspace
-Group:          User Interface/Desktops
-License:        GPLv2+
-Requires:       %{pkg_prefix}-common = %{version}-%{release}
-
-%description -n %{pkg_prefix}-window-grouper
-This GNOME Shell extension keeps windows that belong to the same process on the same workspace.
-
-
 %package -n %{pkg_prefix}-window-list
 Summary:        Display a window list at the bottom of the screen in GNOME Shell
 Group:          User Interface/Desktops
@@ -322,27 +284,28 @@ workspaces.
 
 
 %prep
-%setup -q -n libsass-3.4.5 -b3 -T
-%setup -q -n sassc-3.4.1 -b2 -T
-%autosetup -S git
+%setup -q
+
+%patch1 -p1 -b .shade-panel-in-overview
+%patch2 -p1 -b .brand-applications-menu
+%patch3 -p1 -b .add-extra-extensions
+%patch4 -p1 -b .fix-menu-category-accessibility
+%patch5 -p1 -b .hide-indicator-in-single-workspace-case
+%patch6 -p1 -b .apps-menu-desktop-dnd
+%patch7 -p1 -b .apps-menu-desktop-dnd
+%patch8 -p1 -b .fix-pam-info-messages
 
 
 %build
-(cd ../libsass-3.4.5;
- export LIBSASS_VERSION=3.4.5
- make %{?_smp_mflags})
-(cd ../sassc-3.4.1;
- %make_build LDFLAGS="$RPM_OPT_FLAGS $PWD/../libsass-3.4.5/lib/libsass.a" \
-             CFLAGS="$RPM_OPT_FLAGS -I$PWD/../libsass-3.4.5/include" \
-             CXXFLAGS="$RPM_OPT_FLAGS" \
-             SASS_LIBSASS_PATH=$PWD/../libsass-3.4.5)
-export PATH=$PWD/../sassc-3.4.1/bin:$PATH
+autoreconf -f
+# In case we build from a Git checkout
+[ -x autogen.sh ] && NOCONFIGURE=1 ./autogen.sh 
+%configure  --enable-extensions="all"
+make %{?_smp_mflags}
 
-%meson -Dextension_set="all" -Dclassic_mode=true
-%meson_build
 
 %install
-%meson_install
+%make_install
 
 # Drop useless example extension
 rm -r $RPM_BUILD_ROOT%{_datadir}/gnome-shell/extensions/example*/
@@ -352,7 +315,7 @@ rm $RPM_BUILD_ROOT%{_datadir}/glib-2.0/schemas/org.gnome.shell.extensions.exampl
 
 
 %files -n %{pkg_prefix}-common -f %{name}.lang
-%doc COPYING NEWS README.md
+%doc COPYING NEWS README
 
 
 %files -n gnome-classic-session
@@ -380,9 +343,6 @@ rm $RPM_BUILD_ROOT%{_datadir}/glib-2.0/schemas/org.gnome.shell.extensions.exampl
 %{_datadir}/glib-2.0/schemas/org.gnome.shell.extensions.dash-to-dock.gschema.xml
 %{_datadir}/gnome-shell/extensions/dash-to-dock*/
 
-%files -n %{pkg_prefix}-disable-screenshield
-%{_datadir}/gnome-shell/extensions/disable-screenshield*/
-
 %files -n %{pkg_prefix}-drive-menu
 %{_datadir}/gnome-shell/extensions/drive-menu*/
 
@@ -394,9 +354,6 @@ rm $RPM_BUILD_ROOT%{_datadir}/glib-2.0/schemas/org.gnome.shell.extensions.exampl
 %files -n %{pkg_prefix}-native-window-placement
 %{_datadir}/glib-2.0/schemas/org.gnome.shell.extensions.native-window-placement.gschema.xml
 %{_datadir}/gnome-shell/extensions/native-window-placement*/
-
-%files -n %{pkg_prefix}-no-hot-corner
-%{_datadir}/gnome-shell/extensions/no-hot-corner*/
 
 %files -n %{pkg_prefix}-panel-favorites
 %{_datadir}/gnome-shell/extensions/panel-favorites*/
@@ -426,11 +383,6 @@ rm $RPM_BUILD_ROOT%{_datadir}/glib-2.0/schemas/org.gnome.shell.extensions.exampl
 %files -n %{pkg_prefix}-user-theme
 %{_datadir}/glib-2.0/schemas/org.gnome.shell.extensions.user-theme.gschema.xml
 %{_datadir}/gnome-shell/extensions/user-theme*/
-
-
-%files -n %{pkg_prefix}-window-grouper
-%{_datadir}/gnome-shell/extensions/window-grouper*/
-%{_datadir}/glib-2.0/schemas/org.gnome.shell.extensions.window-grouper.gschema.xml
 
 
 %files -n %{pkg_prefix}-window-list
@@ -509,15 +461,6 @@ fi
 /usr/bin/glib-compile-schemas %{_datadir}/glib-2.0/schemas/ &>/dev/null || :
 
 
-%postun -n %{pkg_prefix}-window-grouper
-if [ $1 -eq 0 ]; then
-  /usr/bin/glib-compile-schemas %{_datadir}/glib-2.0/schemas/ &>/dev/null || :
-fi
-
-%posttrans -n %{pkg_prefix}-window-grouper
-/usr/bin/glib-compile-schemas %{_datadir}/glib-2.0/schemas/ &>/dev/null || :
-
-
 %postun -n %{pkg_prefix}-window-list
 if [ $1 -eq 0 ]; then
   /usr/bin/glib-compile-schemas %{_datadir}/glib-2.0/schemas/ &>/dev/null || :
@@ -528,65 +471,6 @@ fi
 
 
 %changelog
-* Tue Mar 26 2019 Florian Müllner <fmuellner@redhat.com> - 3.28.1-7
-- Add window-grouper extension
-  Resolves: #1355845
-
-- Add disable-screenshield extension
-  Resolves: #1643501
-
-* Fri Mar 15 2019 Ray Strode <rstrode@redhat.com> - 3.28.1-6
-- Fix stuck grab bug
-  Resolves: #1659260
-
-* Tue Sep 04 2018 Ray Strode <rstrode@redhat.com> - 3.28.1-5
-- Get rid of weird drop shadow next to app menu
-  Resolves: #1599841
-
-* Wed Aug 01 2018 Ray Strode <rstrode@redhat.com> - 3.28.1-4
-- Make icons on desktop default in classic session again
-  Resolves: #1610477
-
-* Fri Jun 22 2018 Florian Müllner <fmuellner@redhat.com> - 3.28.1-3
-- Fix a couple of regressions from the rebase:
-  - add back classic overview style
-  - update dash-to-dock to a compatible version
-  Related: #1569717
-
-* Mon Jun 11 2018 Ray Strode <rstrode@redhat.com> - 3.28.1-2
-- Import updated styles from gnome-shell
-  Related: #1569717
-
-* Fri Jun 08 2018 Ray Strode <rstrode@redhat.com> - 3.28.1-1
-- Rebase to 3.28.1
-  Resolves: #1569717
-
-* Fri Feb 23 2018 Florian Müllner <fmuellner@redhat.com> - 3.26.2-3
-- Enable top-icons extension in classic mode
-  Resolves: #1548446
-
-* Wed Feb 07 2018 Florian Müllner <fmuellner@redhat.com> - 3.26.2-2
-- Fix notification legibility in classic mode
-  Resolves: #1507457
-- Fix stray icon shadows in classic mode
-  Resolves: #1530654
-
-* Fri Nov 03 2017 Kalev Lember <klember@redhat.com> - 3.26.2-1
-- Update to 3.26.2
-- Related: #1505743
-
-* Tue Oct 17 2017 Florian Müllner <fmuellner@redhat.com> - 3.26.1-1
-- apps-menu: Support separators
-  Resolves: #1435074
-
-* Tue Oct 17 2017 Florian Müllner <fmuellner@redhat.com> - 3.26.1-1
-- apps-menu: Follow sort order
-  Resolves: #1435073
-
-* Fri Oct 06 2017 Florian Müllner <fmuellner@redhat.com> - 3.26.1-1
-- Update to 3.26.1
-  Related: #1481381
-
 * Mon Jun 26 2017 Ray Strode <rstrode@redhat.com> - 3.22.2-10
 - Fix pam info messages at the unlock screen
   Related: #1449359
