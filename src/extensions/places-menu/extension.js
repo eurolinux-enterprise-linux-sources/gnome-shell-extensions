@@ -3,7 +3,6 @@
 const Clutter = imports.gi.Clutter;
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
-const Lang = imports.lang;
 const Shell = imports.gi.Shell;
 const St = imports.gi.St;
 
@@ -14,7 +13,7 @@ const Panel = imports.ui.panel;
 
 const Gettext = imports.gettext.domain('gnome-shell-extensions');
 const _ = Gettext.gettext;
-const N_ = function(x) { return x; }
+const N_ = x => x;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
@@ -23,45 +22,50 @@ const PlaceDisplay = Me.imports.placeDisplay;
 
 const PLACE_ICON_SIZE = 16;
 
-const PlaceMenuItem = new Lang.Class({
-    Name: 'PlaceMenuItem',
-    Extends: PopupMenu.PopupBaseMenuItem,
-
-    _init: function(info) {
-	this.parent();
-	this._info = info;
+class PlaceMenuItem extends PopupMenu.PopupBaseMenuItem {
+    constructor(info) {
+        super();
+        this._info = info;
 
         this._icon = new St.Icon({ gicon: info.icon,
                                    icon_size: PLACE_ICON_SIZE });
-	this.actor.add_child(this._icon);
+        this.actor.add_child(this._icon);
 
-        this._label = new St.Label({ text: info.name });
+        this._label = new St.Label({ text: info.name, x_expand: true });
         this.actor.add_child(this._label);
 
-        this._changedId = info.connect('changed',
-                                       Lang.bind(this, this._propertiesChanged));
-    },
+        if (info.isRemovable()) {
+            this._ejectIcon = new St.Icon({ icon_name: 'media-eject-symbolic',
+                                            style_class: 'popup-menu-icon ' });
+            this._ejectButton = new St.Button({ child: this._ejectIcon });
+            this._ejectButton.connect('clicked', info.eject.bind(info));
+            this.actor.add_child(this._ejectButton);
+        }
 
-    destroy: function() {
+        this._changedId = info.connect('changed',
+                                       this._propertiesChanged.bind(this));
+    }
+
+    destroy() {
         if (this._changedId) {
             this._info.disconnect(this._changedId);
             this._changedId = 0;
         }
 
-        this.parent();
-    },
+        super.destroy();
+    }
 
-    activate: function(event) {
-	this._info.launch(event.get_time());
+    activate(event) {
+        this._info.launch(event.get_time());
 
-	this.parent(event);
-    },
+        super.activate(event);
+    }
 
-    _propertiesChanged: function(info) {
+    _propertiesChanged(info) {
         this._icon.gicon = info.icon;
         this._label.text = info.name;
-    },
-});
+    }
+};
 
 const SECTIONS = [
     'special',
@@ -70,12 +74,9 @@ const SECTIONS = [
     'network'
 ]
 
-const PlacesMenu = new Lang.Class({
-    Name: 'PlacesMenu.PlacesMenu',
-    Extends: PanelMenu.Button,
-
-    _init: function() {
-        this.parent(0.0, _("Places"));
+class PlacesMenu extends PanelMenu.Button {
+    constructor() {
+        super(0.0, _("Places"));
 
         let hbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
         let label = new St.Label({ text: _("Places"),
@@ -87,41 +88,41 @@ const PlacesMenu = new Lang.Class({
 
         this.placesManager = new PlaceDisplay.PlacesManager();
 
-	this._sections = { };
+        this._sections = { };
 
-	for (let i=0; i < SECTIONS.length; i++) {
-	    let id = SECTIONS[i];
-	    this._sections[id] = new PopupMenu.PopupMenuSection();
-	    this.placesManager.connect(id + '-updated', Lang.bind(this, function() {
-		this._redisplay(id);
-	    }));
+        for (let i=0; i < SECTIONS.length; i++) {
+            let id = SECTIONS[i];
+            this._sections[id] = new PopupMenu.PopupMenuSection();
+            this.placesManager.connect(id + '-updated', () => {
+                this._redisplay(id);
+            });
 
-	    this._create(id);
-	    this.menu.addMenuItem(this._sections[id]);
-	    this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-	}
-    },
+            this._create(id);
+            this.menu.addMenuItem(this._sections[id]);
+            this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        }
+    }
 
-    destroy: function() {
-	this.placesManager.destroy();
+    destroy() {
+        this.placesManager.destroy();
 
-        this.parent();
-    },
+        super.destroy();
+    }
 
-    _redisplay: function(id) {
-	this._sections[id].removeAll();
+    _redisplay(id) {
+        this._sections[id].removeAll();
         this._create(id);
-    },
+    }
 
-    _create: function(id) {
+    _create(id) {
         let places = this.placesManager.get(id);
 
         for (let i = 0; i < places.length; i++)
             this._sections[id].addMenuItem(new PlaceMenuItem(places[i]));
 
-	this._sections[id].actor.visible = places.length > 0;
+        this._sections[id].actor.visible = places.length > 0;
     }
-});
+};
 
 function init() {
     Convenience.initTranslations();
@@ -134,7 +135,7 @@ function enable() {
 
     let pos = 1;
     if ('apps-menu' in Main.panel.statusArea)
-	pos = 2;
+        pos = 2;
     Main.panel.addToStatusArea('places-menu', _indicator, pos, 'left');
 }
 

@@ -4,11 +4,10 @@ const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const GObject = imports.gi.GObject;
 const Gtk = imports.gi.Gtk;
-const Lang = imports.lang;
 
 const Gettext = imports.gettext.domain('gnome-shell-extensions');
 const _ = Gettext.gettext;
-const N_ = function(e) { return e };
+const N_ = e => e;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
@@ -17,32 +16,29 @@ const Convenience = Me.imports.convenience;
 const WORKSPACE_SCHEMA = 'org.gnome.desktop.wm.preferences';
 const WORKSPACE_KEY = 'workspace-names';
 
-const WorkspaceNameModel = new GObject.Class({
-    Name: 'WorkspaceIndicator.WorkspaceNameModel',
-    GTypeName: 'WorkspaceNameModel',
-    Extends: Gtk.ListStore,
-
-    Columns: {
-        LABEL: 0,
-    },
-
-    _init: function(params) {
-        this.parent(params);
+const WorkspaceNameModel = GObject.registerClass(
+class WorkspaceNameModel extends Gtk.ListStore {
+    _init(params) {
+        super._init(params);
         this.set_column_types([GObject.TYPE_STRING]);
 
+        this.Columns = {
+            LABEL: 0,
+        };
+
         this._settings = new Gio.Settings({ schema_id: WORKSPACE_SCHEMA });
-        //this._settings.connect('changed::workspace-names', Lang.bind(this, this._reloadFromSettings));
+        //this._settings.connect('changed::workspace-names', this._reloadFromSettings.bind(this));
 
         this._reloadFromSettings();
 
         // overriding class closure doesn't work, because GtkTreeModel
         // plays tricks with marshallers and class closures
-        this.connect('row-changed', Lang.bind(this, this._onRowChanged));
-        this.connect('row-inserted', Lang.bind(this, this._onRowInserted));
-        this.connect('row-deleted', Lang.bind(this, this._onRowDeleted));
-    },
+        this.connect('row-changed', this._onRowChanged.bind(this));
+        this.connect('row-inserted', this._onRowInserted.bind(this));
+        this.connect('row-deleted', this._onRowDeleted.bind(this));
+    }
 
-    _reloadFromSettings: function() {
+    _reloadFromSettings() {
         if (this._preventChanges)
             return;
         this._preventChanges = true;
@@ -67,9 +63,9 @@ const WorkspaceNameModel = new GObject.Class({
         }
 
         this._preventChanges = false;
-    },
+    }
 
-    _onRowChanged: function(self, path, iter) {
+    _onRowChanged(self, path, iter) {
         if (this._preventChanges)
             return;
         this._preventChanges = true;
@@ -88,9 +84,9 @@ const WorkspaceNameModel = new GObject.Class({
         this._settings.set_strv(WORKSPACE_KEY, names);
 
         this._preventChanges = false;
-    },
+    }
 
-    _onRowInserted: function(self, path, iter) {
+    _onRowInserted(self, path, iter) {
         if (this._preventChanges)
             return;
         this._preventChanges = true;
@@ -103,9 +99,9 @@ const WorkspaceNameModel = new GObject.Class({
         this._settings.set_strv(WORKSPACE_KEY, names);
 
         this._preventChanges = false;
-    },
+    }
 
-    _onRowDeleted: function(self, path) {
+    _onRowDeleted(self, path) {
         if (this._preventChanges)
             return;
         this._preventChanges = true;
@@ -125,16 +121,13 @@ const WorkspaceNameModel = new GObject.Class({
         this._settings.set_strv(WORKSPACE_KEY, names);
 
         this._preventChanges = false;
-    },
+    }
 });
 
-const WorkspaceSettingsWidget = new GObject.Class({
-    Name: 'WorkspaceIndicator.WorkspaceSettingsWidget',
-    GTypeName: 'WorkspaceSettingsWidget',
-    Extends: Gtk.Grid,
-
-    _init: function(params) {
-        this.parent(params);
+const WorkspaceSettingsWidget = GObject.registerClass(
+class WorkspaceSettingsWidget extends Gtk.Grid {
+    _init(params) {
+        super._init(params);
         this.margin = 12;
         this.orientation = Gtk.Orientation.VERTICAL;
 
@@ -156,7 +149,7 @@ const WorkspaceSettingsWidget = new GObject.Class({
 
         let column = new Gtk.TreeViewColumn({ title: _("Name") });
         let renderer = new Gtk.CellRendererText({ editable: true });
-        renderer.connect('edited', Lang.bind(this, this._cellEdited));
+        renderer.connect('edited', this._cellEdited.bind(this));
         column.pack_start(renderer, true);
         column.add_attribute(renderer, 'text', this._store.Columns.LABEL);
         this._treeView.append_column(column);
@@ -167,39 +160,38 @@ const WorkspaceSettingsWidget = new GObject.Class({
         toolbar.get_style_context().add_class(Gtk.STYLE_CLASS_INLINE_TOOLBAR);
 
         let newButton = new Gtk.ToolButton({ icon_name: 'list-add-symbolic' });
-        newButton.connect('clicked', Lang.bind(this, this._newClicked));
+        newButton.connect('clicked', this._newClicked.bind(this));
         toolbar.add(newButton);
 
         let delButton = new Gtk.ToolButton({ icon_name: 'list-remove-symbolic' });
-        delButton.connect('clicked', Lang.bind(this, this._delClicked));
+        delButton.connect('clicked', this._delClicked.bind(this));
         toolbar.add(delButton);
 
         let selection = this._treeView.get_selection();
-        selection.connect('changed',
-            function() {
-                delButton.sensitive = selection.count_selected_rows() > 0;
-            });
+        selection.connect('changed', () => {
+            delButton.sensitive = selection.count_selected_rows() > 0;
+        });
         delButton.sensitive = selection.count_selected_rows() > 0;
 
         this.add(toolbar);
-    },
+    }
 
-    _cellEdited: function(renderer, path, new_text) {
+    _cellEdited(renderer, path, new_text) {
         let [ok, iter] = this._store.get_iter_from_string(path);
 
         if (ok)
             this._store.set(iter, [this._store.Columns.LABEL], [new_text]);
-    },
+    }
 
-    _newClicked: function() {
+    _newClicked() {
         let iter = this._store.append();
         let index = this._store.get_path(iter).get_indices()[0];
 
         let label = _("Workspace %d").format(index + 1);
         this._store.set(iter, [this._store.Columns.LABEL], [label]);
-    },
+    }
 
-    _delClicked: function() {
+    _delClicked() {
         let [any, model, iter] = this._treeView.get_selection().get_selected();
 
         if (any)

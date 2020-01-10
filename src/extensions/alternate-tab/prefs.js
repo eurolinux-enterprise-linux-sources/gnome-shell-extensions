@@ -3,11 +3,10 @@
 const Gio = imports.gi.Gio;
 const Gtk = imports.gi.Gtk;
 const GObject = imports.gi.GObject;
-const Lang = imports.lang;
 
 const Gettext = imports.gettext.domain('gnome-shell-extensions');
 const _ = Gettext.gettext;
-const N_ = function(e) { return e };
+const N_ = e => e;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
@@ -22,16 +21,13 @@ const MODES = {
     'both': N_("Thumbnail and application icon"),
 };
 
-const AltTabSettingsWidget = new GObject.Class({
-    Name: 'AlternateTab.Prefs.AltTabSettingsWidget',
-    GTypeName: 'AltTabSettingsWidget',
-    Extends: Gtk.Grid,
-
-    _init : function(params) {
-        this.parent(params);
+const AltTabSettingsWidget = GObject.registerClass(
+class AltTabSettingsWidget extends Gtk.Grid {
+    _init(params) {
+        super._init(params);
         this.margin = 24;
         this.row_spacing = 6;
-	this.orientation = Gtk.Orientation.VERTICAL;
+        this.orientation = Gtk.Orientation.VERTICAL;
 
         this._settings = new Gio.Settings({ schema_id: 'org.gnome.shell.window-switcher' });
 
@@ -56,21 +52,21 @@ const AltTabSettingsWidget = new GObject.Class({
             let name = Gettext.gettext(MODES[mode]);
 
             radio = new Gtk.RadioButton({ group: radio, label: name, valign: Gtk.Align.START });
-            radio.connect('toggled', Lang.bind(this, function(widget) {
+            radio.connect('toggled', widget => {
                 if (widget.active)
                     this._settings.set_string(SETTINGS_APP_ICON_MODE, modeCapture);
-            }));
+            });
             grid.add(radio);
 
             if (mode == currentMode)
                 radio.active = true;
         }
 
-	let check = new Gtk.CheckButton({ label: _("Show only windows in the current workspace"),
-	                                  margin_top: 6 });
-	this._settings.bind(SETTINGS_CURRENT_WORKSPACE_ONLY, check, 'active', Gio.SettingsBindFlags.DEFAULT);
-	this.add(check);
-    },
+        let check = new Gtk.CheckButton({ label: _("Show only windows in the current workspace"),
+                                          margin_top: 6 });
+        this._settings.bind(SETTINGS_CURRENT_WORKSPACE_ONLY, check, 'active', Gio.SettingsBindFlags.DEFAULT);
+        this.add(check);
+    }
 });
 
 function init() {

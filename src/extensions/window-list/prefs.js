@@ -3,7 +3,6 @@
 const Gio = imports.gi.Gio;
 const GObject = imports.gi.GObject;
 const Gtk = imports.gi.Gtk;
-const Lang = imports.lang;
 
 const Gettext = imports.gettext.domain('gnome-shell-extensions');
 const _ = Gettext.gettext;
@@ -17,13 +16,10 @@ function init() {
     Convenience.initTranslations();
 }
 
-const WindowListPrefsWidget = new GObject.Class({
-    Name: 'WindowList.Prefs.Widget',
-    GTypeName: 'WindowListPrefsWidget',
-    Extends: Gtk.Grid,
-
-    _init: function(params) {
-        this.parent(params);
+const WindowListPrefsWidget = GObject.registerClass(
+class WindowListPrefsWidget extends Gtk.Grid {
+    _init(params) {
+        super._init(params);
 
         this.margin = 24;
         this.row_spacing = 6;
@@ -66,10 +62,10 @@ const WindowListPrefsWidget = new GObject.Class({
                                           group: radio });
             grid.add(radio);
 
-            radio.connect('toggled', Lang.bind(this, function(button) {
+            radio.connect('toggled', button => {
                 if (button.active)
                     this._settings.set_string('grouping-mode', mode);
-            }));
+            });
         }
 
         let check = new Gtk.CheckButton({ label: _("Show on all monitors"),

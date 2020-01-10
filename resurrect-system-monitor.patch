@@ -1,4 +1,4 @@
-From 5b4f81b1b510cc254221cac762dd282408c18a8c Mon Sep 17 00:00:00 2001
+From 57bb099db30703a474a023122f1106e199ff79ed Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Florian=20M=C3=BCllner?= <fmuellner@gnome.org>
 Date: Wed, 17 May 2017 19:13:50 +0200
 Subject: [PATCH 1/4] extensions: Resurrect systemMonitor extension
@@ -13,78 +13,20 @@ as well though, so we need to bring it back ...
 
 This reverts commit c9a6421f362cd156cf731289eadc11f44f6970ac.
 ---
- README                                    |   4 +
- configure.ac                              |   8 +-
- extensions/systemMonitor/Makefile.am      |   3 +
- extensions/systemMonitor/extension.js     | 376 ++++++++++++++++++++++++++++++
+ extensions/systemMonitor/extension.js     | 376 ++++++++++++++++++++++
+ extensions/systemMonitor/meson.build      |   5 +
  extensions/systemMonitor/metadata.json.in |  11 +
- extensions/systemMonitor/stylesheet.css   |  35 +++
- 6 files changed, 436 insertions(+), 1 deletion(-)
- create mode 100644 extensions/systemMonitor/Makefile.am
+ extensions/systemMonitor/stylesheet.css   |  35 ++
+ meson.build                               |   1 +
+ 5 files changed, 428 insertions(+)
  create mode 100644 extensions/systemMonitor/extension.js
+ create mode 100644 extensions/systemMonitor/meson.build
  create mode 100644 extensions/systemMonitor/metadata.json.in
  create mode 100644 extensions/systemMonitor/stylesheet.css
 
-diff --git a/README b/README
-index cc53a8d..e2bea7a 100644
---- a/README
-+++ b/README
-@@ -57,6 +57,10 @@ places-menu
- 
-   Shows a status Indicator for navigating to Places.
- 
-+systemMonitor
-+
-+  An message tray indicator showing CPU and memory loads.
-+
- user-theme
- 
-   Loads a shell theme from ~/.themes/<name>/gnome-shell.
-diff --git a/configure.ac b/configure.ac
-index 34b2171..2c0036c 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -31,7 +31,7 @@ AC_SUBST([SHELL_VERSION])
- dnl keep this in alphabetic order
- CLASSIC_EXTENSIONS="apps-menu places-menu alternate-tab launch-new-instance window-list"
- DEFAULT_EXTENSIONS="$CLASSIC_EXTENSIONS drive-menu screenshot-window-sizer windowsNavigator workspace-indicator"
--ALL_EXTENSIONS="$DEFAULT_EXTENSIONS auto-move-windows dash-to-dock example native-window-placement no-hot-corner panel-favorites top-icons updates-dialog user-theme"
-+ALL_EXTENSIONS="$DEFAULT_EXTENSIONS auto-move-windows dash-to-dock example native-window-placement no-hot-corner panel-favorites systemMonitor top-icons updates-dialog user-theme"
- AC_SUBST(CLASSIC_EXTENSIONS, [$CLASSIC_EXTENSIONS])
- AC_SUBST(ALL_EXTENSIONS, [$ALL_EXTENSIONS])
- AC_ARG_ENABLE([extensions],
-@@ -62,6 +62,11 @@ AM_CONDITIONAL([CLASSIC_MODE], [test x"$enable_classic_mode" != xno])
- ENABLED_EXTENSIONS=
- for e in $enable_extensions; do
- 	case $e in
-+		systemMonitor)
-+			PKG_CHECK_MODULES(GTOP, libgtop-2.0 >= 2.28.3,
-+					[ENABLED_EXTENSIONS="$ENABLED_EXTENSIONS $e"],
-+					[AC_MSG_WARN([libgtop-2.0 not found, disabling systemMonitor])])
-+			;;
- dnl		keep this in alphabetic order
- 		alternate-tab|apps-menu|auto-move-windows|dash-to-dock|drive-menu|example|launch-new-instance|native-window-placement|no-hot-corner|panel-favorites|places-menu|screenshot-window-sizer|top-icons|updates-dialog|user-theme|window-list|windowsNavigator|workspace-indicator)
- 			ENABLED_EXTENSIONS="$ENABLED_EXTENSIONS $e"
-@@ -90,6 +95,7 @@ AC_CONFIG_FILES([
-   extensions/panel-favorites/Makefile
-   extensions/places-menu/Makefile
-   extensions/screenshot-window-sizer/Makefile
-+  extensions/systemMonitor/Makefile
-   extensions/top-icons/Makefile
-   extensions/updates-dialog/Makefile
-   extensions/user-theme/Makefile
-diff --git a/extensions/systemMonitor/Makefile.am b/extensions/systemMonitor/Makefile.am
-new file mode 100644
-index 0000000..50ce6d2
---- /dev/null
-+++ b/extensions/systemMonitor/Makefile.am
-@@ -0,0 +1,3 @@
-+EXTENSION_ID = systemMonitor
-+
-+include ../../extension.mk
 diff --git a/extensions/systemMonitor/extension.js b/extensions/systemMonitor/extension.js
 new file mode 100644
-index 0000000..58a2f57
+index 0000000..7b09df0
 --- /dev/null
 +++ b/extensions/systemMonitor/extension.js
 @@ -0,0 +1,376 @@
@@ -220,7 +162,7 @@ index 0000000..58a2f57
 +        cr.setLineWidth(1);
 +        cr.setDash([4,1], 0);
 +        cr.stroke();
-+        
++
 +        //draw the foreground
 +
 +        function makePath(values, reverse, nudge) {
@@ -241,7 +183,7 @@ index 0000000..58a2f57
 +
 +            }
 +        }
-+        
++
 +        let renderStats = this.renderStats;
 +
 +        // Make sure we don't have more sample points than pixels
@@ -258,10 +200,10 @@ index 0000000..58a2f57
 +            let outlineColor = themeNode.get_color(stat.color);
 +            let color = new Clutter.Color(outlineColor);
 +            color.alpha = color.alpha * .4;
-+           
++
 +            // Render the background between us and the next level
 +            makePath(stat.values, false);
-+            // If there is a process below us, render the cpu between us and it, otherwise, 
++            // If there is a process below us, render the cpu between us and it, otherwise,
 +            // render to the bottom of the chart
 +            if (i == renderStats.length - 1) {
 +                cr.lineTo(stat.values.length - 1, height);
@@ -274,7 +216,7 @@ index 0000000..58a2f57
 +            cr.closePath()
 +            Clutter.cairo_set_source_color(cr, color);
 +            cr.fill();
-+            
++
 +            // Render the outline of this level
 +            makePath(stat.values, false, .5);
 +            Clutter.cairo_set_source_color(cr, outlineColor);
@@ -294,7 +236,7 @@ index 0000000..58a2f57
 +
 +        this.gridColor = '-grid-color';
 +        this.renderStats = [ 'cpu-user', 'cpu-sys', 'cpu-iowait' ];
-+        
++
 +        // Make sure renderStats is sorted as necessary for rendering
 +        let renderStatOrder = {'cpu-total': 0, 'cpu-user': 1, 'cpu-sys': 2, 'cpu-iowait': 3};
 +        this.renderStats = this.renderStats.sort(function(a,b) {
@@ -308,11 +250,11 @@ index 0000000..58a2f57
 +        this._prev = new GTop.glibtop_cpu;
 +        GTop.glibtop_get_cpu(this._prev);
 +
-+        this.stats = { 
++        this.stats = {
 +                       'cpu-user': {color: '-cpu-user-color', values: []},
 +                       'cpu-sys': {color: '-cpu-sys-color', values: []},
 +                       'cpu-iowait': {color: '-cpu-iowait-color', values: []},
-+                       'cpu-total': {color: '-cpu-total-color', values: []} 
++                       'cpu-total': {color: '-cpu-total-color', values: []}
 +                     };
 +    },
 +
@@ -333,7 +275,7 @@ index 0000000..58a2f57
 +        t += user / total;
 +        this.stats['cpu-user'].values.push(t);
 +        this.stats['cpu-total'].values.push(1 - idle / total);
-+        
++
 +        this._prev = cpu;
 +    }
 +});
@@ -341,13 +283,13 @@ index 0000000..58a2f57
 +const MemoryIndicator = new Lang.Class({
 +    Name: 'SystemMonitor.MemoryIndicator',
 +    Extends: Indicator,
-+    
++
 +    _init: function() {
 +        this.parent();
 +
 +        this.gridColor = '-grid-color';
 +        this.renderStats = [ 'mem-user', 'mem-other', 'mem-cached' ];
-+        
++
 +        // Make sure renderStats is sorted as necessary for rendering
 +        let renderStatOrder = { 'mem-cached': 0, 'mem-other': 1, 'mem-user': 2 };
 +        this.renderStats = this.renderStats.sort(function(a,b) {
@@ -464,6 +406,17 @@ index 0000000..58a2f57
 +function init() {
 +    return new Extension();
 +}
+diff --git a/extensions/systemMonitor/meson.build b/extensions/systemMonitor/meson.build
+new file mode 100644
+index 0000000..48504f6
+--- /dev/null
++++ b/extensions/systemMonitor/meson.build
+@@ -0,0 +1,5 @@
++extension_data += configure_file(
++  input: metadata_name + '.in',
++  output: metadata_name,
++  configuration: metadata_conf
++)
 diff --git a/extensions/systemMonitor/metadata.json.in b/extensions/systemMonitor/metadata.json.in
 new file mode 100644
 index 0000000..fa75007
@@ -522,11 +475,77 @@ index 0000000..13f95ec
 +    font-size: 9pt;
 +    font-weight: bold;
 +}
+diff --git a/meson.build b/meson.build
+index 201c484..cde2d34 100644
+--- a/meson.build
++++ b/meson.build
+@@ -30,60 +30,61 @@ if ver_arr[1].to_int().is_even()
+ else
+   shell_version = '.'.join(ver_arr)
+ endif
+ 
+ uuid_suffix = '@gnome-shell-extensions.gcampax.github.com'
+ 
+ classic_extensions = [
+   'alternate-tab',
+   'apps-menu',
+   'places-menu',
+   'launch-new-instance',
+   'window-list'
+ ]
+ 
+ default_extensions = classic_extensions
+ default_extensions += [
+   'drive-menu',
+   'screenshot-window-sizer',
+   'windowsNavigator',
+   'workspace-indicator'
+ ]
+ 
+ all_extensions = default_extensions
+ all_extensions += [
+   'auto-move-windows',
+   'dash-to-dock',
+   'example',
+   'native-window-placement',
+   'no-hot-corner',
+   'panel-favorites',
++  'systemMonitor',
+   'top-icons',
+   'updates-dialog',
+   'user-theme'
+ ]
+ 
+ enabled_extensions = get_option('enable_extensions')
+ 
+ if enabled_extensions.length() == 0
+   set = get_option('extension_set')
+ 
+   if set == 'classic'
+     enabled_extensions += classic_extensions
+   elif set == 'default'
+     enabled_extensions += default_extensions
+   elif set == 'all'
+     enabled_extensions += all_extensions
+   endif
+ endif
+ 
+ classic_mode_enabled = get_option('classic_mode')
+ 
+ if classic_mode_enabled
+   # Sanity check: Make sure all classic extensions are enabled
+   foreach e : classic_extensions
+     if not enabled_extensions.contains(e)
+       error('Classic mode is enabled, ' +
+             'but the required extension @0@ is not.'.format(e))
+     endif
+   endforeach
+ endif
 -- 
-2.14.2
+2.17.1
 
 
-From 529c0c1da0259953130a0e098820854336b1c87e Mon Sep 17 00:00:00 2001
+From 8ffea72d040e165c73b1b2eba82e6c4e106aee7f Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Florian=20M=C3=BCllner?= <fmuellner@gnome.org>
 Date: Wed, 17 May 2017 19:31:58 +0200
 Subject: [PATCH 2/4] systemMonitor: Move indicators to calendar
@@ -537,15 +556,18 @@ drop-down looks like the best option, given that it replaced the
 old tray (and also took over the old keyboard shortcut to bring
 it up quickly).
 ---
- extensions/systemMonitor/extension.js   | 56 ++++++++++++++++-----------------
- extensions/systemMonitor/stylesheet.css | 14 ---------
+ extensions/systemMonitor/extension.js   | 56 ++++++++++++-------------
+ extensions/systemMonitor/stylesheet.css | 14 -------
  2 files changed, 28 insertions(+), 42 deletions(-)
 
 diff --git a/extensions/systemMonitor/extension.js b/extensions/systemMonitor/extension.js
-index 58a2f57..01146fa 100644
+index 7b09df0..1388a1f 100644
 --- a/extensions/systemMonitor/extension.js
 +++ b/extensions/systemMonitor/extension.js
-@@ -4,10 +4,12 @@ const Clutter = imports.gi.Clutter;
+@@ -1,132 +1,146 @@
+ /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
+ 
+ const Clutter = imports.gi.Clutter;
  const GTop = imports.gi.GTop;
  const Lang = imports.lang;
  const Mainloop = imports.mainloop;
@@ -558,7 +580,21 @@ index 58a2f57..01146fa 100644
  const Tweener = imports.ui.tweener;
  
  const Gettext = imports.gettext.domain('gnome-shell-extensions');
-@@ -29,18 +31,21 @@ const Indicator = new Lang.Class({
+ const _ = Gettext.gettext;
+ 
+ const ExtensionUtils = imports.misc.extensionUtils;
+ const Me = ExtensionUtils.getCurrentExtension();
+ const Convenience = Me.imports.convenience;
+ 
+ const INDICATOR_UPDATE_INTERVAL = 500;
+ const INDICATOR_NUM_GRID_LINES = 3;
+ 
+ const ITEM_LABEL_SHOW_TIME = 0.15;
+ const ITEM_LABEL_HIDE_TIME = 0.1;
+ const ITEM_HOVER_TIMEOUT = 300;
+ 
+ const Indicator = new Lang.Class({
+     Name: 'SystemMonitor.Indicator',
  
      _init: function() {
          this._initValues();
@@ -588,7 +624,32 @@ index 58a2f57..01146fa 100644
  
          this._timeout = Mainloop.timeout_add(INDICATOR_UPDATE_INTERVAL, Lang.bind(this, function () {
              this._updateValues();
-@@ -73,6 +78,7 @@ const Indicator = new Lang.Class({
+             this.drawing_area.queue_repaint();
+             return true;
+         }));
+     },
+ 
+     showLabel: function() {
+         if (this.label == null)
+             return;
+ 
+         this.label.opacity = 0;
+         this.label.show();
+ 
+         let [stageX, stageY] = this.actor.get_transformed_position();
+ 
+ 	let itemWidth = this.actor.allocation.x2 - this.actor.allocation.x1;
+         let itemHeight = this.actor.allocation.y2 - this.actor.allocation.y1;
+ 
+ 	let labelWidth = this.label.width;
+         let labelHeight = this.label.height;
+         let xOffset = Math.floor((itemWidth - labelWidth) / 2)
+ 
+         let x = stageX + xOffset;
+ 
+         let node = this.label.get_theme_node();
+         let yOffset = node.get_length('-y-offset');
+ 
          let y = stageY - this.label.get_height() - yOffset;
  
          this.label.set_position(x, y);
@@ -596,7 +657,27 @@ index 58a2f57..01146fa 100644
          Tweener.addTween(this.label,
                           { opacity: 255,
                             time: ITEM_LABEL_SHOW_TIME,
-@@ -100,6 +106,14 @@ const Indicator = new Lang.Class({
+                            transition: 'easeOutQuad',
+                          });
+     },
+ 
+     setLabelText: function(text) {
+         if (this.label == null)
+             this.label = new St.Label({ style_class: 'extension-systemMonitor-indicator-label'});
+ 
+         this.label.set_text(text);
+         Main.layoutManager.addChrome(this.label);
+         this.label.hide();
+     },
+ 
+     hideLabel: function () {
+         Tweener.addTween(this.label,
+                          { opacity: 0,
+                            time: ITEM_LABEL_HIDE_TIME,
+                            transition: 'easeOutQuad',
+                            onComplete: Lang.bind(this, function() {
+                                this.label.hide();
+                            })
                           });
      },
  
@@ -611,7 +692,61 @@ index 58a2f57..01146fa 100644
      destroy: function() {
          Mainloop.source_remove(this._timeout);
  
-@@ -194,6 +208,7 @@ const Indicator = new Lang.Class({
+         this.actor.destroy();
+ 	if (this.label)
+ 	    this.label.destroy();
+     },
+ 
+     _initValues: function() {
+     },
+ 
+     _updateValues: function() {
+     },
+ 
+     _draw: function(area) {
+         let [width, height] = area.get_surface_size();
+         let themeNode = this.actor.get_theme_node();
+         let cr = area.get_context();
+ 
+         //draw the background grid
+         let color = themeNode.get_color(this.gridColor);
+         let gridOffset = Math.floor(height / (INDICATOR_NUM_GRID_LINES + 1));
+         for (let i = 1; i <= INDICATOR_NUM_GRID_LINES; ++i) {
+                 cr.moveTo(0, i * gridOffset + .5);
+                 cr.lineTo(width, i * gridOffset + .5);
+         }
+         Clutter.cairo_set_source_color(cr, color);
+         cr.setLineWidth(1);
+         cr.setDash([4,1], 0);
+         cr.stroke();
+@@ -167,60 +181,61 @@ const Indicator = new Lang.Class({
+             // We outline at full opacity and fill with 40% opacity
+             let outlineColor = themeNode.get_color(stat.color);
+             let color = new Clutter.Color(outlineColor);
+             color.alpha = color.alpha * .4;
+ 
+             // Render the background between us and the next level
+             makePath(stat.values, false);
+             // If there is a process below us, render the cpu between us and it, otherwise,
+             // render to the bottom of the chart
+             if (i == renderStats.length - 1) {
+                 cr.lineTo(stat.values.length - 1, height);
+                 cr.lineTo(0, height);
+                 cr.closePath();
+             } else {
+                 let nextStat = this.stats[renderStats[i+1]];
+                 makePath(nextStat.values, true);
+             }
+             cr.closePath()
+             Clutter.cairo_set_source_color(cr, color);
+             cr.fill();
+ 
+             // Render the outline of this level
+             makePath(stat.values, false, .5);
+             Clutter.cairo_set_source_color(cr, outlineColor);
+             cr.setLineWidth(1.0);
+             cr.setDash([], 0);
+             cr.stroke();
          }
      }
  });
@@ -619,7 +754,61 @@ index 58a2f57..01146fa 100644
  
  const CpuIndicator = new Lang.Class({
      Name: 'SystemMonitor.CpuIndicator',
-@@ -302,9 +317,7 @@ const Extension = new Lang.Class({
+     Extends: Indicator,
+ 
+     _init: function() {
+         this.parent();
+ 
+         this.gridColor = '-grid-color';
+         this.renderStats = [ 'cpu-user', 'cpu-sys', 'cpu-iowait' ];
+ 
+         // Make sure renderStats is sorted as necessary for rendering
+         let renderStatOrder = {'cpu-total': 0, 'cpu-user': 1, 'cpu-sys': 2, 'cpu-iowait': 3};
+         this.renderStats = this.renderStats.sort(function(a,b) {
+             return renderStatOrder[a] - renderStatOrder[b];
+         });
+ 
+ 	this.setLabelText(_("CPU"));
+     },
+ 
+     _initValues: function() {
+         this._prev = new GTop.glibtop_cpu;
+         GTop.glibtop_get_cpu(this._prev);
+ 
+         this.stats = {
+                        'cpu-user': {color: '-cpu-user-color', values: []},
+                        'cpu-sys': {color: '-cpu-sys-color', values: []},
+                        'cpu-iowait': {color: '-cpu-iowait-color', values: []},
+                        'cpu-total': {color: '-cpu-total-color', values: []}
+                      };
+@@ -275,96 +290,81 @@ const MemoryIndicator = new Lang.Class({
+                         'mem-cached': { color: "-mem-cached-color", values: [] }
+                      };
+     },
+ 
+     _updateValues: function() {
+         GTop.glibtop_get_mem(this.mem);
+ 
+         let t = this.mem.user / this.mem.total;
+         this.stats['mem-user'].values.push(t);
+         t += (this.mem.used - this.mem.user - this.mem.cached) / this.mem.total;
+         this.stats['mem-other'].values.push(t);
+         t += this.mem.cached / this.mem.total;
+         this.stats['mem-cached'].values.push(t);
+     }
+ });
+ 
+ const INDICATORS = [CpuIndicator, MemoryIndicator];
+ 
+ const Extension = new Lang.Class({
+     Name: 'SystemMonitor.Extension',
+ 
+     _init: function() {
+ 	Convenience.initTranslations();
+ 
+ 	this._showLabelTimeoutId = 0;
+ 	this._resetHoverTimeoutId = 0;
+ 	this._labelShowing = false;
      },
  
      enable: function() {
@@ -630,7 +819,8 @@ index 58a2f57..01146fa 100644
  	this._indicators = [ ];
  
  	for (let i = 0; i < INDICATORS.length; i++) {
-@@ -313,31 +326,18 @@ const Extension = new Lang.Class({
+ 	    let indicator = new (INDICATORS[i])();
+ 
              indicator.actor.connect('notify::hover', Lang.bind(this, function() {
  		this._onHover(indicator);
  	    }));
@@ -666,11 +856,38 @@ index 58a2f57..01146fa 100644
      },
  
      _onHover: function (item) {
+         if (item.actor.get_hover()) {
+             if (this._showLabelTimeoutId == 0) {
+                 let timeout = this._labelShowing ? 0 : ITEM_HOVER_TIMEOUT;
+                 this._showLabelTimeoutId = Mainloop.timeout_add(timeout,
+                     Lang.bind(this, function() {
+                         this._labelShowing = true;
+                         item.showLabel();
+                         return false;
+                     }));
+                 if (this._resetHoverTimeoutId > 0) {
+                     Mainloop.source_remove(this._resetHoverTimeoutId);
+                     this._resetHoverTimeoutId = 0;
+                 }
+             }
+         } else {
+             if (this._showLabelTimeoutId > 0)
+                 Mainloop.source_remove(this._showLabelTimeoutId);
+             this._showLabelTimeoutId = 0;
+             item.hideLabel();
+             if (this._labelShowing) {
+                 this._resetHoverTimeoutId = Mainloop.timeout_add(ITEM_HOVER_TIMEOUT,
+                     Lang.bind(this, function() {
+                         this._labelShowing = false;
+                         return false;
+                     }));
+             }
+         }
 diff --git a/extensions/systemMonitor/stylesheet.css b/extensions/systemMonitor/stylesheet.css
 index 13f95ec..978ac12 100644
 --- a/extensions/systemMonitor/stylesheet.css
 +++ b/extensions/systemMonitor/stylesheet.css
-@@ -1,17 +1,4 @@
+@@ -1,35 +1,21 @@
 -.extension-systemMonitor-container {
 -    spacing: 5px;
 -    padding-left: 5px;
@@ -688,7 +905,9 @@ index 13f95ec..978ac12 100644
      height: 50px;
      -grid-color: #575757;
      -cpu-total-color: rgb(0,154,62);
-@@ -21,7 +8,6 @@
+     -cpu-user-color: rgb(69,154,0);
+     -cpu-sys-color: rgb(255,253,81);
+     -cpu-iowait-color: rgb(210,148,0);
      -mem-user-color: rgb(210,148,0);
      -mem-cached-color: rgb(90,90,90);
      -mem-other-color: rgb(205,203,41);
@@ -696,11 +915,19 @@ index 13f95ec..978ac12 100644
  }
  
  .extension-systemMonitor-indicator-label {
+     border-radius: 7px;
+     padding: 4px 12px;
+     background-color: rgba(0,0,0,0.9);
+     text-align: center;
+     -y-offset: 8px;
+     font-size: 9pt;
+     font-weight: bold;
+ }
 -- 
-2.14.2
+2.17.1
 
 
-From 77669f312fcd4cdc823c74fecb12480fb5e9769f Mon Sep 17 00:00:00 2001
+From e1133a8a92c49a90e02f8d2f1e66c7aae9d19519 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Florian=20M=C3=BCllner?= <fmuellner@gnome.org>
 Date: Thu, 18 May 2017 16:20:07 +0200
 Subject: [PATCH 3/4] systemMonitor: Handle clicks on section title
@@ -716,10 +943,37 @@ Fixes: #3
  1 file changed, 19 insertions(+), 1 deletion(-)
 
 diff --git a/extensions/systemMonitor/extension.js b/extensions/systemMonitor/extension.js
-index 01146fa..cc49cbb 100644
+index 1388a1f..9c010d8 100644
 --- a/extensions/systemMonitor/extension.js
 +++ b/extensions/systemMonitor/extension.js
-@@ -303,6 +303,24 @@ const MemoryIndicator = new Lang.Class({
+@@ -276,75 +276,93 @@ const MemoryIndicator = new Lang.Class({
+         // Make sure renderStats is sorted as necessary for rendering
+         let renderStatOrder = { 'mem-cached': 0, 'mem-other': 1, 'mem-user': 2 };
+         this.renderStats = this.renderStats.sort(function(a,b) {
+             return renderStatOrder[a] - renderStatOrder[b];
+         });
+ 
+ 	this.setLabelText(_("Memory"));
+     },
+ 
+     _initValues: function() {
+         this.mem = new GTop.glibtop_mem;
+         this.stats = {
+                         'mem-user': { color: "-mem-user-color", values: [] },
+                         'mem-other': { color: "-mem-other-color", values: [] },
+                         'mem-cached': { color: "-mem-cached-color", values: [] }
+                      };
+     },
+ 
+     _updateValues: function() {
+         GTop.glibtop_get_mem(this.mem);
+ 
+         let t = this.mem.user / this.mem.total;
+         this.stats['mem-user'].values.push(t);
+         t += (this.mem.used - this.mem.user - this.mem.cached) / this.mem.total;
+         this.stats['mem-other'].values.push(t);
+         t += this.mem.cached / this.mem.total;
+         this.stats['mem-cached'].values.push(t);
      }
  });
  
@@ -744,7 +998,14 @@ index 01146fa..cc49cbb 100644
  const INDICATORS = [CpuIndicator, MemoryIndicator];
  
  const Extension = new Lang.Class({
-@@ -317,7 +335,7 @@ const Extension = new Lang.Class({
+     Name: 'SystemMonitor.Extension',
+ 
+     _init: function() {
+ 	Convenience.initTranslations();
+ 
+ 	this._showLabelTimeoutId = 0;
+ 	this._resetHoverTimeoutId = 0;
+ 	this._labelShowing = false;
      },
  
      enable: function() {
@@ -753,11 +1014,38 @@ index 01146fa..cc49cbb 100644
  	this._indicators = [ ];
  
  	for (let i = 0; i < INDICATORS.length; i++) {
+ 	    let indicator = new (INDICATORS[i])();
+ 
+             indicator.actor.connect('notify::hover', Lang.bind(this, function() {
+ 		this._onHover(indicator);
+ 	    }));
+ 	    this._section.addMessage(indicator, false);
+ 	    this._indicators.push(indicator);
+ 	}
+ 
+         Main.panel.statusArea.dateMenu._messageList._addSection(this._section);
+         this._section.actor.get_parent().set_child_at_index(this._section.actor, 0);
+     },
+ 
+     disable: function() {
+ 	this._indicators.forEach(function(i) { i.destroy(); });
+ 
+         Main.panel.statusArea.dateMenu._messageList._removeSection(this._section);
+     },
+ 
+     _onHover: function (item) {
+         if (item.actor.get_hover()) {
+             if (this._showLabelTimeoutId == 0) {
+                 let timeout = this._labelShowing ? 0 : ITEM_HOVER_TIMEOUT;
+                 this._showLabelTimeoutId = Mainloop.timeout_add(timeout,
+                     Lang.bind(this, function() {
+                         this._labelShowing = true;
+                         item.showLabel();
 -- 
-2.14.2
+2.17.1
 
 
-From 7ba627fcc4646366c851fb0e4a4aa0ddf521b6b7 Mon Sep 17 00:00:00 2001
+From d2a0c7bfdb3fedf56021b6fd64628e4cda1aa294 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Florian=20M=C3=BCllner?= <fmuellner@gnome.org>
 Date: Thu, 18 May 2017 18:00:17 +0200
 Subject: [PATCH 4/4] systemMonitor: Provide classic styling
@@ -768,25 +1056,11 @@ style.
 
 Fixes: #4
 ---
- extensions/systemMonitor/Makefile.am | 6 ++++++
  extensions/systemMonitor/classic.css | 6 ++++++
- 2 files changed, 12 insertions(+)
+ extensions/systemMonitor/meson.build | 4 ++++
+ 2 files changed, 10 insertions(+)
  create mode 100644 extensions/systemMonitor/classic.css
 
-diff --git a/extensions/systemMonitor/Makefile.am b/extensions/systemMonitor/Makefile.am
-index 50ce6d2..64a61df 100644
---- a/extensions/systemMonitor/Makefile.am
-+++ b/extensions/systemMonitor/Makefile.am
-@@ -1,3 +1,9 @@
- EXTENSION_ID = systemMonitor
- 
-+EXTRA_MODULES = 
-+
-+if CLASSIC_MODE
-+  EXTRA_MODULES += classic.css
-+endif
-+
- include ../../extension.mk
 diff --git a/extensions/systemMonitor/classic.css b/extensions/systemMonitor/classic.css
 new file mode 100644
 index 0000000..946863d
@@ -799,6 +1073,20 @@ index 0000000..946863d
 +    background-color: rgba(237,237,237,0.9);
 +    border: 1px solid #a1a1a1;
 +}
+diff --git a/extensions/systemMonitor/meson.build b/extensions/systemMonitor/meson.build
+index 48504f6..b6548b1 100644
+--- a/extensions/systemMonitor/meson.build
++++ b/extensions/systemMonitor/meson.build
+@@ -1,5 +1,9 @@
+ extension_data += configure_file(
+   input: metadata_name + '.in',
+   output: metadata_name,
+   configuration: metadata_conf
+ )
++
++if classic_mode_enabled
++  extension_data += files('classic.css')
++endif
 -- 
-2.14.2
+2.17.1
 

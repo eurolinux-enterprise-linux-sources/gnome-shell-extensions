@@ -5,8 +5,8 @@
 %global pkg_prefix gnome-shell-extension
 
 Name:           gnome-shell-extensions
-Version:        3.26.2
-Release:        3%{?dist}
+Version:        3.28.1
+Release:        5%{?dist}
 Summary:        Modify and extend GNOME Shell functionality and behavior
 
 Group:          User Interface/Desktops
@@ -14,8 +14,11 @@ Group:          User Interface/Desktops
 License:        GPLv2+ and BSD
 URL:            http://wiki.gnome.org/Projects/GnomeShell/Extensions
 Source0:        http://ftp.gnome.org/pub/GNOME/sources/%{name}/%{major_version}/%{name}-%{version}.tar.xz
+Source2:        https://github.com/sass/sassc/archive/3.4.1.tar.gz
+Source3:        https://github.com/sass/libsass/archive/3.4.5.tar.gz
 # BuildRequires:  gnome-common
-BuildRequires:  autoconf automake
+BuildRequires:  meson
+BuildRequires:  ruby
 BuildRequires:  gettext >= 0.19.6
 BuildRequires:  git
 BuildRequires:  pkgconfig(gnome-desktop-3.0)
@@ -24,16 +27,15 @@ Requires:       gnome-shell >= %{min_gs_version}
 BuildArch:      noarch
 
 Patch1: 0001-Update-style.patch
-Patch2: 0001-classic-shade-panel-in-overview.patch
+Patch2: 0001-classic-Shade-panel-in-overview.patch
 Patch3: 0001-apps-menu-add-logo-icon-to-Applications-menu.patch
 Patch4: add-extra-extensions.patch
 Patch5: 0001-apps-menu-Explicitly-set-label_actor.patch
 Patch6: resurrect-system-monitor.patch
-Patch7: 0001-loginDialog-make-info-messages-themed.patch
-Patch8: apps-menu-follow-sort-order.patch
-Patch9: apps-menu-support-separators.patch
-Patch10: classic-style-fixes.patch
+Patch7: 0001-data-drop-app-icon-styling.patch
 Patch11: 0001-Include-top-icons-in-classic-session.patch
+
+Patch99: 0001-Revert-data-Remove-nautilus-classic.patch
 
 %description
 GNOME Shell Extensions is a collection of extensions providing additional and
@@ -299,19 +301,27 @@ workspaces.
 
 
 %prep
+%setup -q -n libsass-3.4.5 -b3 -T
+%setup -q -n sassc-3.4.1 -b2 -T
 %autosetup -S git
 
 
 %build
-autoreconf -f
-# In case we build from a Git checkout
-[ -x autogen.sh ] && NOCONFIGURE=1 ./autogen.sh 
-%configure  --enable-extensions="all"
-make %{?_smp_mflags}
+(cd ../libsass-3.4.5;
+ export LIBSASS_VERSION=3.4.5
+ make %{?_smp_mflags})
+(cd ../sassc-3.4.1;
+ %make_build LDFLAGS="$RPM_OPT_FLAGS $PWD/../libsass-3.4.5/lib/libsass.a" \
+             CFLAGS="$RPM_OPT_FLAGS -I$PWD/../libsass-3.4.5/include" \
+             CXXFLAGS="$RPM_OPT_FLAGS" \
+             SASS_LIBSASS_PATH=$PWD/../libsass-3.4.5)
+export PATH=$PWD/../sassc-3.4.1/bin:$PATH
 
+%meson -Dextension_set="all" -Dclassic_mode=true
+%meson_build
 
 %install
-%make_install
+%meson_install
 
 # Drop useless example extension
 rm -r $RPM_BUILD_ROOT%{_datadir}/gnome-shell/extensions/example*/
@@ -321,7 +331,7 @@ rm $RPM_BUILD_ROOT%{_datadir}/glib-2.0/schemas/org.gnome.shell.extensions.exampl
 
 
 %files -n %{pkg_prefix}-common -f %{name}.lang
-%doc COPYING NEWS README
+%doc COPYING NEWS README.md
 
 
 %files -n gnome-classic-session
@@ -480,7 +490,29 @@ fi
 
 
 %changelog
-* Fri Feb 23 2018 Florian MÃ¼llner <fmuellner@redhat.com> - 3.26.2-3
+* Tue Sep 04 2018 Ray Strode <rstrode@redhat.com> - 3.28.1-5
+- Get rid of weird drop shadow next to app menu
+  Resolves: #1599841
+
+* Wed Aug 01 2018 Ray Strode <rstrode@redhat.com> - 3.28.1-4
+- Make icons on desktop default in classic session again
+  Resolves: #1610477
+
+* Fri Jun 22 2018 Florian Müllner <fmuellner@redhat.com> - 3.28.1-3
+- Fix a couple of regressions from the rebase:
+  - add back classic overview style
+  - update dash-to-dock to a compatible version
+  Related: #1569717
+
+* Mon Jun 11 2018 Ray Strode <rstrode@redhat.com> - 3.28.1-2
+- Import updated styles from gnome-shell
+  Related: #1569717
+
+* Fri Jun 08 2018 Ray Strode <rstrode@redhat.com> - 3.28.1-1
+- Rebase to 3.28.1
+  Resolves: #1569717
+
+* Fri Feb 23 2018 Florian Müllner <fmuellner@redhat.com> - 3.26.2-3
 - Enable top-icons extension in classic mode
   Resolves: #1548446
 
