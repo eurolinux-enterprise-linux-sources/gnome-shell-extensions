@@ -1,7 +1,7 @@
-From 4a5b83835224c80847892029213838545df065e2 Mon Sep 17 00:00:00 2001
+From ef4ced7c19941f1a6e368ec6b859cdc918d28426 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Florian=20M=C3=BCllner?= <fmuellner@gnome.org>
 Date: Wed, 20 May 2015 17:44:50 +0200
-Subject: [PATCH 1/5] Add top-icons extension
+Subject: [PATCH 1/7] Add top-icons extension
 
 ---
  extensions/top-icons/extension.js     | 225 ++++++++++++++++++++++++++
@@ -293,13 +293,13 @@ index 40a8275..c16bde1 100644
  ]
  
 -- 
-2.17.1
+2.21.0
 
 
-From cbf1d6142b0b46fdd3947606286eb5abc0b1e02c Mon Sep 17 00:00:00 2001
+From a219c4f34806b6642f0cfc5f890662d599bfd1a5 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Florian=20M=C3=BCllner?= <fmuellner@gnome.org>
 Date: Wed, 20 May 2015 18:05:41 +0200
-Subject: [PATCH 2/5] Add dash-to-dock extension
+Subject: [PATCH 2/7] Add dash-to-dock extension
 
 ---
  extensions/dash-to-dock/Settings.ui           | 3332 +++++++++++++++++
@@ -13637,13 +13637,13 @@ index c16bde1..f9b56cf 100644
    'native-window-placement',
    'top-icons',
 -- 
-2.17.1
+2.21.0
 
 
-From 671a9cb9728d7de3bd617fec40045b0397bf0cab Mon Sep 17 00:00:00 2001
+From 8175177aa1a3fd8a40d41df1f23beee1f99d06b9 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Florian=20M=C3=BCllner?= <fmuellner@gnome.org>
 Date: Wed, 20 May 2015 18:55:47 +0200
-Subject: [PATCH 3/5] Add panel-favorites extension
+Subject: [PATCH 3/7] Add panel-favorites extension
 
 ---
  extensions/panel-favorites/extension.js     | 267 ++++++++++++++++++++
@@ -13990,13 +13990,13 @@ index f9b56cf..3451585 100644
    'user-theme'
  ]
 -- 
-2.17.1
+2.21.0
 
 
-From d518dca768e895a00e7eae89b72cab8474826314 Mon Sep 17 00:00:00 2001
+From 0bec6fd48fc857c54ef4917b1648f507c8142270 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Florian=20M=C3=BCllner?= <fmuellner@gnome.org>
 Date: Fri, 4 Mar 2016 17:07:21 +0100
-Subject: [PATCH 4/5] Add updates-dialog extension
+Subject: [PATCH 4/7] Add updates-dialog extension
 
 ---
  extensions/updates-dialog/extension.js        | 490 ++++++++++++++++++
@@ -14607,13 +14607,13 @@ index d98ca1b..43a817f 100644
  extensions/user-theme/org.gnome.shell.extensions.user-theme.gschema.xml
  extensions/window-list/extension.js
 -- 
-2.17.1
+2.21.0
 
 
-From e5f70e34dc8bb90fe1df024c5964bb0b206ea6b5 Mon Sep 17 00:00:00 2001
+From c86f37e39adb0d2e1fce01cb68be47c675a9ace9 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Florian=20M=C3=BCllner?= <fmuellner@gnome.org>
 Date: Thu, 1 Jun 2017 23:57:14 +0200
-Subject: [PATCH 5/5] Add no-hot-corner extension
+Subject: [PATCH 5/7] Add no-hot-corner extension
 
 ---
  extensions/no-hot-corner/extension.js     | 31 +++++++++++++++++++++++
@@ -14710,5 +14710,516 @@ index 08a243e..201c484 100644
    'top-icons',
    'updates-dialog',
 -- 
-2.17.1
+2.21.0
+
+
+From 9749175fac05702dbed39942b4e5ffe889a84f8c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Florian=20M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Tue, 26 Mar 2019 19:44:43 +0100
+Subject: [PATCH 6/7] Add window-grouper extension
+
+---
+ extensions/window-grouper/extension.js        | 109 ++++++++++
+ extensions/window-grouper/meson.build         |   8 +
+ extensions/window-grouper/metadata.json.in    |  11 +
+ ...hell.extensions.window-grouper.gschema.xml |   9 +
+ extensions/window-grouper/prefs.js            | 194 ++++++++++++++++++
+ extensions/window-grouper/stylesheet.css      |   1 +
+ meson.build                                   |   3 +-
+ 7 files changed, 334 insertions(+), 1 deletion(-)
+ create mode 100644 extensions/window-grouper/extension.js
+ create mode 100644 extensions/window-grouper/meson.build
+ create mode 100644 extensions/window-grouper/metadata.json.in
+ create mode 100644 extensions/window-grouper/org.gnome.shell.extensions.window-grouper.gschema.xml
+ create mode 100644 extensions/window-grouper/prefs.js
+ create mode 100644 extensions/window-grouper/stylesheet.css
+
+diff --git a/extensions/window-grouper/extension.js b/extensions/window-grouper/extension.js
+new file mode 100644
+index 0000000..e67e634
+--- /dev/null
++++ b/extensions/window-grouper/extension.js
+@@ -0,0 +1,109 @@
++// -*- mode: js2; indent-tabs-mode: nil; js2-basic-offset: 4 -*-
++// Start apps on custom workspaces
++
++const Shell = imports.gi.Shell;
++
++const Main = imports.ui.main;
++
++const ExtensionUtils = imports.misc.extensionUtils;
++const Me = ExtensionUtils.getCurrentExtension();
++const Convenience = Me.imports.convenience;
++
++class WindowMover {
++    constructor() {
++        this._settings = Convenience.getSettings();
++        this._appSystem = Shell.AppSystem.get_default();
++        this._appConfigs = new Set();
++        this._appData = new Map();
++
++        this._appsChangedId =
++            this._appSystem.connect('installed-changed',
++                                    this._updateAppData.bind(this));
++
++        this._settings.connect('changed', this._updateAppConfigs.bind(this));
++        this._updateAppConfigs();
++    }
++
++    _updateAppConfigs() {
++        this._appConfigs.clear();
++
++        this._settings.get_strv('application-list').forEach(appId => {
++            this._appConfigs.add(appId);
++        });
++
++        this._updateAppData();
++    }
++
++    _updateAppData() {
++        let ids = [...this._appConfigs.values()];
++        let removedApps = [...this._appData.keys()].filter(
++            a => !ids.includes(a.id)
++        );
++        removedApps.forEach(app => {
++            app.disconnect(this._appData.get(app).windowsChangedId);
++            this._appData.delete(app);
++        });
++
++        let addedApps = ids.map(id => this._appSystem.lookup_app(id)).filter(
++            app => app != null && !this._appData.has(app)
++        );
++        addedApps.forEach(app => {
++            let data = {
++                windows: app.get_windows(),
++                windowsChangedId: app.connect('windows-changed',
++                                              this._appWindowsChanged.bind(this))
++            }
++            this._appData.set(app, data);
++        });
++    }
++
++    destroy() {
++        if (this._appsChangedId) {
++            this._appSystem.disconnect(this._appsChangedId);
++            this._appsChangedId = 0;
++        }
++
++        if (this._settings) {
++            this._settings.run_dispose();
++            this._settings = null;
++        }
++
++        this._appConfigs.clear();
++        this._updateAppData();
++    }
++
++    _appWindowsChanged(app) {
++        let data = this._appData.get(app);
++        let windows = app.get_windows();
++
++        // If get_compositor_private() returns non-NULL on a removed windows,
++        // the window still exists and is just moved to a different workspace
++        // or something; assume it'll be added back immediately, so keep it
++        // to avoid moving it again
++        windows.push(...data.windows.filter(
++            w => !windows.includes(w) && w.get_compositor_private() != null
++        ));
++
++        windows.filter(w => !data.windows.includes(w)).forEach(window => {
++            let leader = data.windows.find(w => w.get_pid() == window.get_pid());
++            if (leader)
++                window.change_workspace(leader.get_workspace());
++        });
++        data.windows = windows;
++    }
++};
++
++let prevCheckWorkspaces;
++let winMover;
++
++function init() {
++    Convenience.initTranslations();
++}
++
++function enable() {
++    winMover = new WindowMover();
++}
++
++function disable() {
++    winMover.destroy();
++}
+diff --git a/extensions/window-grouper/meson.build b/extensions/window-grouper/meson.build
+new file mode 100644
+index 0000000..c55a783
+--- /dev/null
++++ b/extensions/window-grouper/meson.build
+@@ -0,0 +1,8 @@
++extension_data += configure_file(
++  input: metadata_name + '.in',
++  output: metadata_name,
++  configuration: metadata_conf
++)
++
++extension_sources += files('prefs.js')
++extension_schemas += files(metadata_conf.get('gschemaname') + '.gschema.xml')
+diff --git a/extensions/window-grouper/metadata.json.in b/extensions/window-grouper/metadata.json.in
+new file mode 100644
+index 0000000..aa202c8
+--- /dev/null
++++ b/extensions/window-grouper/metadata.json.in
+@@ -0,0 +1,11 @@
++{
++ "extension-id": "@extension_id@",
++ "uuid": "@uuid@",
++ "settings-schema": "@gschemaname@",
++ "gettext-domain": "@gettext_domain@",
++ "name": "Window grouper",
++ "description": "Keep windows that belong to the same process on the same workspace.",
++ "shell-version": [ "@shell_current@" ],
++ "original-authors": [ "fmuellner@redhat.com" ],
++ "url": "@url@"
++}
+diff --git a/extensions/window-grouper/org.gnome.shell.extensions.window-grouper.gschema.xml b/extensions/window-grouper/org.gnome.shell.extensions.window-grouper.gschema.xml
+new file mode 100644
+index 0000000..ee052a6
+--- /dev/null
++++ b/extensions/window-grouper/org.gnome.shell.extensions.window-grouper.gschema.xml
+@@ -0,0 +1,9 @@
++<schemalist gettext-domain="gnome-shell-extensions">
++  <schema id="org.gnome.shell.extensions.window-grouper" path="/org/gnome/shell/extensions/window-grouper/">
++    <key name="application-list" type="as">
++      <default>[ ]</default>
++      <summary>Application that should be grouped</summary>
++      <description>A list of application ids</description>
++    </key>
++  </schema>
++</schemalist>
+diff --git a/extensions/window-grouper/prefs.js b/extensions/window-grouper/prefs.js
+new file mode 100644
+index 0000000..27fbcca
+--- /dev/null
++++ b/extensions/window-grouper/prefs.js
+@@ -0,0 +1,194 @@
++// -*- mode: js2; indent-tabs-mode: nil; js2-basic-offset: 4 -*-
++// Start apps on custom workspaces
++
++const { Gio, GObject, Gtk } = imports.gi;
++
++const Gettext = imports.gettext.domain('gnome-shell-extensions');
++const _ = Gettext.gettext;
++const N_ = e => e;
++
++const ExtensionUtils = imports.misc.extensionUtils;
++const Me = ExtensionUtils.getCurrentExtension();
++const Convenience = Me.imports.convenience;
++
++const SETTINGS_KEY = 'application-list';
++
++const Columns = {
++    APPINFO: 0,
++    DISPLAY_NAME: 1,
++    ICON: 2
++};
++
++const Widget = GObject.registerClass({
++    GTypeName: 'WindowGrouperPrefsWidget',
++}, class Widget extends Gtk.Grid {
++    _init(params) {
++        super._init(params);
++        this.set_orientation(Gtk.Orientation.VERTICAL);
++
++        this._settings = Convenience.getSettings();
++        this._settings.connect('changed', this._refresh.bind(this));
++        this._changedPermitted = false;
++
++        this._store = new Gtk.ListStore();
++        this._store.set_column_types([Gio.AppInfo, GObject.TYPE_STRING, Gio.Icon]);
++
++        let scrolled = new Gtk.ScrolledWindow({ shadow_type: Gtk.ShadowType.IN});
++        scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
++        this.add(scrolled);
++
++
++        this._treeView = new Gtk.TreeView({
++            model: this._store,
++            headers_visible: false,
++            hexpand: true,
++            vexpand: true
++        });
++        this._treeView.get_selection().set_mode(Gtk.SelectionMode.SINGLE);
++
++        let appColumn = new Gtk.TreeViewColumn({
++            sort_column_id: Columns.DISPLAY_NAME,
++            spacing: 12
++        });
++        let iconRenderer = new Gtk.CellRendererPixbuf({
++            stock_size: Gtk.IconSize.DIALOG,
++            xpad: 12,
++            ypad: 12
++        });
++        appColumn.pack_start(iconRenderer, false);
++        appColumn.add_attribute(iconRenderer, "gicon", Columns.ICON);
++        let nameRenderer = new Gtk.CellRendererText();
++        appColumn.pack_start(nameRenderer, true);
++        appColumn.add_attribute(nameRenderer, "text", Columns.DISPLAY_NAME);
++        this._treeView.append_column(appColumn);
++
++        scrolled.add(this._treeView);
++
++        let toolbar = new Gtk.Toolbar({ icon_size: Gtk.IconSize.SMALL_TOOLBAR });
++        toolbar.get_style_context().add_class(Gtk.STYLE_CLASS_INLINE_TOOLBAR);
++        this.add(toolbar);
++
++        let newButton = new Gtk.ToolButton({
++            icon_name: 'list-add-symbolic'
++        });
++        newButton.connect('clicked', this._createNew.bind(this));
++        toolbar.add(newButton);
++
++        let delButton = new Gtk.ToolButton({
++            icon_name: 'list-remove-symbolic'
++        });
++        delButton.connect('clicked', this._deleteSelected.bind(this));
++        toolbar.add(delButton);
++
++        let selection = this._treeView.get_selection();
++        selection.connect('changed', () => {
++            delButton.sensitive = selection.count_selected_rows() > 0;
++        });
++        delButton.sensitive = selection.count_selected_rows() > 0;
++
++        this._changedPermitted = true;
++        this._refresh();
++    }
++
++    _createNew() {
++        let dialog = new Gtk.AppChooserDialog({
++            heading: _("Select an application for which grouping should apply"),
++            transient_for: this.get_toplevel(),
++            modal: true
++        });
++
++        dialog.get_widget().show_all = true;
++
++        dialog.connect('response', (dialog, id) => {
++            if (id != Gtk.ResponseType.OK) {
++                dialog.destroy();
++                return;
++            }
++
++            let appInfo = dialog.get_app_info();
++            if (!appInfo) {
++                dialog.destroy();
++                return;
++            }
++
++            this._changedPermitted = false;
++            this._appendItem(appInfo.get_id());
++            this._changedPermitted = true;
++
++            let iter = this._store.append();
++            this._store.set(iter,
++                            [Columns.APPINFO, Columns.ICON, Columns.DISPLAY_NAME],
++                            [appInfo, appInfo.get_icon(), appInfo.get_display_name()]);
++
++            dialog.destroy();
++        });
++        dialog.show_all();
++    }
++
++    _deleteSelected() {
++        let [any, model, iter] = this._treeView.get_selection().get_selected();
++
++        if (any) {
++            let appInfo = this._store.get_value(iter, Columns.APPINFO);
++
++            this._changedPermitted = false;
++            this._removeItem(appInfo.get_id());
++            this._changedPermitted = true;
++            this._store.remove(iter);
++        }
++    }
++
++    _refresh() {
++        if (!this._changedPermitted)
++            // Ignore this notification, model is being modified outside
++            return;
++
++        this._store.clear();
++
++        let currentItems = this._settings.get_strv(SETTINGS_KEY);
++        let validItems = [ ];
++        for (let i = 0; i < currentItems.length; i++) {
++            let id = currentItems[i];
++            let appInfo = Gio.DesktopAppInfo.new(id);
++            if (!appInfo)
++                continue;
++            validItems.push(currentItems[i]);
++
++            let iter = this._store.append();
++            this._store.set(iter,
++                            [Columns.APPINFO, Columns.ICON, Columns.DISPLAY_NAME],
++                            [appInfo, appInfo.get_icon(), appInfo.get_display_name()]);
++        }
++
++        if (validItems.length != currentItems.length) // some items were filtered out
++            this._settings.set_strv(SETTINGS_KEY, validItems);
++    }
++
++    _appendItem(id) {
++        let currentItems = this._settings.get_strv(SETTINGS_KEY);
++        currentItems.push(id);
++        this._settings.set_strv(SETTINGS_KEY, currentItems);
++    }
++
++    _removeItem(id) {
++        let currentItems = this._settings.get_strv(SETTINGS_KEY);
++        let index = currentItems.indexOf(id);
++
++        if (index < 0)
++            return;
++        currentItems.splice(index, 1);
++        this._settings.set_strv(SETTINGS_KEY, currentItems);
++    }
++});
++
++
++function init() {
++    Convenience.initTranslations();
++}
++
++function buildPrefsWidget() {
++    let widget = new Widget({ margin: 12 });
++    widget.show_all();
++
++    return widget;
++}
+diff --git a/extensions/window-grouper/stylesheet.css b/extensions/window-grouper/stylesheet.css
+new file mode 100644
+index 0000000..25134b6
+--- /dev/null
++++ b/extensions/window-grouper/stylesheet.css
+@@ -0,0 +1 @@
++/* This extensions requires no special styling */
+diff --git a/meson.build b/meson.build
+index 201c484..6a4d1bf 100644
+--- a/meson.build
++++ b/meson.build
+@@ -59,7 +59,8 @@ all_extensions += [
+   'panel-favorites',
+   'top-icons',
+   'updates-dialog',
+-  'user-theme'
++  'user-theme',
++  'window-grouper'
+ ]
+ 
+ enabled_extensions = get_option('enable_extensions')
+-- 
+2.21.0
+
+
+From a2e46a1c2ee8308133703a9ba7951fdc4621100a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Florian=20M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Tue, 26 Mar 2019 21:32:09 +0100
+Subject: [PATCH 7/7] Add disable-screenshield extension
+
+---
+ extensions/disable-screenshield/extension.js  | 32 +++++++++++++++++++
+ extensions/disable-screenshield/meson.build   |  5 +++
+ .../disable-screenshield/metadata.json.in     |  9 ++++++
+ .../disable-screenshield/stylesheet.css       |  1 +
+ meson.build                                   |  1 +
+ 5 files changed, 48 insertions(+)
+ create mode 100644 extensions/disable-screenshield/extension.js
+ create mode 100644 extensions/disable-screenshield/meson.build
+ create mode 100644 extensions/disable-screenshield/metadata.json.in
+ create mode 100644 extensions/disable-screenshield/stylesheet.css
+
+diff --git a/extensions/disable-screenshield/extension.js b/extensions/disable-screenshield/extension.js
+new file mode 100644
+index 0000000..4f80f3c
+--- /dev/null
++++ b/extensions/disable-screenshield/extension.js
+@@ -0,0 +1,32 @@
++const ScreenShield = imports.ui.screenShield;
++
++let _onUserBecameActiveOrig;
++
++function _onUserBecameActiveInjected()
++{
++    this.idleMonitor.remove_watch(this._becameActiveId);
++    this._becameActiveId = 0;
++
++    this._longLightbox.hide();
++    this._shortLightbox.hide();
++
++    this.deactivate(false);
++}
++
++function init()
++{
++}
++
++function enable()
++{
++    _onUserBecameActiveOrig =
++        ScreenShield.ScreenShield.prototype._onUserBecameActive;
++    ScreenShield.ScreenShield.prototype._onUserBecameActive =
++        _onUserBecameActiveInjected;
++}
++
++function disable()
++{
++    ScreenShield.ScreenShield.prototype._onUserBecameActive =
++        _onUserBecameActiveOrig;
++}
+diff --git a/extensions/disable-screenshield/meson.build b/extensions/disable-screenshield/meson.build
+new file mode 100644
+index 0000000..48504f6
+--- /dev/null
++++ b/extensions/disable-screenshield/meson.build
+@@ -0,0 +1,5 @@
++extension_data += configure_file(
++  input: metadata_name + '.in',
++  output: metadata_name,
++  configuration: metadata_conf
++)
+diff --git a/extensions/disable-screenshield/metadata.json.in b/extensions/disable-screenshield/metadata.json.in
+new file mode 100644
+index 0000000..074429f
+--- /dev/null
++++ b/extensions/disable-screenshield/metadata.json.in
+@@ -0,0 +1,9 @@
++{
++  "extension-id": "@extension_id@", 
++  "uuid": "@uuid@", 
++  "name": "Disable Screen Shield", 
++  "description": "Disable screen shield when screen lock is disabled", 
++  "shell-version": [ "@shell_current@" ],
++  "original-authors": [ "lgpasquale@gmail.com" ],
++  "url": "@url@"
++}
+diff --git a/extensions/disable-screenshield/stylesheet.css b/extensions/disable-screenshield/stylesheet.css
+new file mode 100644
+index 0000000..25134b6
+--- /dev/null
++++ b/extensions/disable-screenshield/stylesheet.css
+@@ -0,0 +1 @@
++/* This extensions requires no special styling */
+diff --git a/meson.build b/meson.build
+index 6a4d1bf..7562eb1 100644
+--- a/meson.build
++++ b/meson.build
+@@ -53,6 +53,7 @@ all_extensions = default_extensions
+ all_extensions += [
+   'auto-move-windows',
+   'dash-to-dock',
++  'disable-screenshield',
+   'example',
+   'native-window-placement',
+   'no-hot-corner',
+-- 
+2.21.0
 

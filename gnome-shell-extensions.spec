@@ -6,7 +6,7 @@
 
 Name:           gnome-shell-extensions
 Version:        3.28.1
-Release:        5%{?dist}
+Release:        7%{?dist}
 Summary:        Modify and extend GNOME Shell functionality and behavior
 
 Group:          User Interface/Desktops
@@ -34,6 +34,7 @@ Patch5: 0001-apps-menu-Explicitly-set-label_actor.patch
 Patch6: resurrect-system-monitor.patch
 Patch7: 0001-data-drop-app-icon-styling.patch
 Patch11: 0001-Include-top-icons-in-classic-session.patch
+Patch12: 0001-window-list-drop-button-grab-when-leaving-button.patch
 
 Patch99: 0001-Revert-data-Remove-nautilus-classic.patch
 
@@ -148,6 +149,16 @@ Requires:       %{pkg_prefix}-common = %{version}-%{release}
 
 %description -n %{pkg_prefix}-dash-to-dock
 This GNOME Shell extension makes the dash available outside the activities overview.
+
+
+%package -n %{pkg_prefix}-disable-screenshield
+Summary:        Disable GNOME Shell screen shield if lock is disabled
+Group:          User Interface/Desktops
+License:        GPLv2+
+Requires:       %{pkg_prefix}-common = %{version}-%{release}
+
+%description -n %{pkg_prefix}-disable-screenshield
+This GNOME Shell extension disabled the screen shield if screen locking is disabled.
 
 
 %package -n %{pkg_prefix}-drive-menu
@@ -268,6 +279,16 @@ This GNOME Shell extension enables loading a GNOME Shell theme from
 ~/.themes/<name>/gnome-shell/.
 
 
+%package -n %{pkg_prefix}-window-grouper
+Summary:        Keep windows that belong to the same process on the same workspace
+Group:          User Interface/Desktops
+License:        GPLv2+
+Requires:       %{pkg_prefix}-common = %{version}-%{release}
+
+%description -n %{pkg_prefix}-window-grouper
+This GNOME Shell extension keeps windows that belong to the same process on the same workspace.
+
+
 %package -n %{pkg_prefix}-window-list
 Summary:        Display a window list at the bottom of the screen in GNOME Shell
 Group:          User Interface/Desktops
@@ -359,6 +380,9 @@ rm $RPM_BUILD_ROOT%{_datadir}/glib-2.0/schemas/org.gnome.shell.extensions.exampl
 %{_datadir}/glib-2.0/schemas/org.gnome.shell.extensions.dash-to-dock.gschema.xml
 %{_datadir}/gnome-shell/extensions/dash-to-dock*/
 
+%files -n %{pkg_prefix}-disable-screenshield
+%{_datadir}/gnome-shell/extensions/disable-screenshield*/
+
 %files -n %{pkg_prefix}-drive-menu
 %{_datadir}/gnome-shell/extensions/drive-menu*/
 
@@ -402,6 +426,11 @@ rm $RPM_BUILD_ROOT%{_datadir}/glib-2.0/schemas/org.gnome.shell.extensions.exampl
 %files -n %{pkg_prefix}-user-theme
 %{_datadir}/glib-2.0/schemas/org.gnome.shell.extensions.user-theme.gschema.xml
 %{_datadir}/gnome-shell/extensions/user-theme*/
+
+
+%files -n %{pkg_prefix}-window-grouper
+%{_datadir}/gnome-shell/extensions/window-grouper*/
+%{_datadir}/glib-2.0/schemas/org.gnome.shell.extensions.window-grouper.gschema.xml
 
 
 %files -n %{pkg_prefix}-window-list
@@ -480,6 +509,15 @@ fi
 /usr/bin/glib-compile-schemas %{_datadir}/glib-2.0/schemas/ &>/dev/null || :
 
 
+%postun -n %{pkg_prefix}-window-grouper
+if [ $1 -eq 0 ]; then
+  /usr/bin/glib-compile-schemas %{_datadir}/glib-2.0/schemas/ &>/dev/null || :
+fi
+
+%posttrans -n %{pkg_prefix}-window-grouper
+/usr/bin/glib-compile-schemas %{_datadir}/glib-2.0/schemas/ &>/dev/null || :
+
+
 %postun -n %{pkg_prefix}-window-list
 if [ $1 -eq 0 ]; then
   /usr/bin/glib-compile-schemas %{_datadir}/glib-2.0/schemas/ &>/dev/null || :
@@ -490,6 +528,17 @@ fi
 
 
 %changelog
+* Tue Mar 26 2019 Florian Müllner <fmuellner@redhat.com> - 3.28.1-7
+- Add window-grouper extension
+  Resolves: #1355845
+
+- Add disable-screenshield extension
+  Resolves: #1643501
+
+* Fri Mar 15 2019 Ray Strode <rstrode@redhat.com> - 3.28.1-6
+- Fix stuck grab bug
+  Resolves: #1659260
+
 * Tue Sep 04 2018 Ray Strode <rstrode@redhat.com> - 3.28.1-5
 - Get rid of weird drop shadow next to app menu
   Resolves: #1599841
